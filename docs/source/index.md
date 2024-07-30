@@ -1,6 +1,8 @@
 # Welcome to CellulOS's documentation!
 
-A fanastic description
+```{attention}
+This wiki is currently under construction
+```
 
 ```{toctree}
 :maxdepth: 2
