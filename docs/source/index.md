@@ -20,4 +20,5 @@ development_overview
 :maxdepth: 2
 :caption: Design
 design_overview
+deadlocks
 ```
