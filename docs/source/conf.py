@@ -2,9 +2,9 @@
 
 # -- Project information
 
-project = 'Lumache'
-copyright = '2021, Graziella'
-author = 'Graziella'
+project = 'CellulOS'
+copyright = '2024, Sid Agrawal'
+author = 'Sid Agrawal, Linh Pham, Arya Stevinson'
 
 release = '0.1'
 version = '0.1.0'
@@ -31,6 +31,10 @@ templates_path = ['_templates']
 # -- Options for HTML output
 
 html_theme = 'sphinx_rtd_theme'
+
+html_theme_options = {
+    'navigation_depth': 2,
+}
 
 # -- Options for EPUB output
 epub_show_urls = 'footnote'
