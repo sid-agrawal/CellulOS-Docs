@@ -32,3 +32,18 @@ python3 -m pip install -r requirements.txt
 
 2. Build the html files: `make html`
 3. Launch: `open ./build/html/index.html`
+
+## Using Sphinx
+
+We are using [MyST](https://myst-parser.readthedocs.io/en/latest/index.html) to parse markdown instead of reStructuredText, so the directives are slightly different from regular [Sphinx](https://www.sphinx-doc.org/en/master/usage/restructuredtext/index.html). 
+
+Often, if there is a restructured text directive that look like this:
+
+    .. directive_name:: arg0 arg1
+        :option_name: option_value
+
+Then we can use the same directive in markdown like this:
+
+    ```{directive_name} arg0 arg1
+        :option_name: option_value
+    ```
