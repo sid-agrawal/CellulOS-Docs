@@ -1,10 +1,8 @@
 # Getting Started
 
-There will be some good stuff in here
-
-## Section 1
-
-## Section 2
+```{toctree}
+:maxdepth: 2
+```
 
 <!---
 Some, things that would be good to add here:

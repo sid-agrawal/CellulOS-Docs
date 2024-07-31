@@ -12,8 +12,9 @@ getting_started
 
 ```{toctree}
 :maxdepth: 2
-:caption: Development Manual
+:caption: Development
 development_overview
+resource_servers
 ```
 
 ```{toctree}
@@ -21,4 +22,5 @@ development_overview
 :caption: Design
 design_overview
 deadlocks
+design_quirks
 ```
