@@ -21,6 +21,7 @@ resource_servers
 :maxdepth: 2
 :caption: Design
 design_overview
+design_apps
 deadlocks
 design_quirks
 ```
