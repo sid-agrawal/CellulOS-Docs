@@ -1,7 +1,7 @@
 # Creation
 A resource server is started like any other PD, but it will usually need some particular RDEs (`MO`, `VMR`, `RESSPC`, and potentially others), an endpoint to listen on, and a resource space so it can begin serving resources. The below diagram is not the *only* way that a resource server could start, but it is the way that our resource servers currently start.
 
-```{image} figures/resource_server_startup.png
+```{image} ../figures/resource_server_startup.png
   :width: 600
 ```
 

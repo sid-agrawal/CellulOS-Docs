@@ -13,7 +13,7 @@ PDs frequently make requests to the root task via `seL4_Call`. The root task als
 
 With a single-threaded root task, we could easily reach a deadlock if we do not design carefully. For example, consider the following scenario:
 
-```{image} figures/model_extraction_deadlock.png
+```{image} ../figures/model_extraction_deadlock.png
   :width: 700px
 ```
 
@@ -42,7 +42,7 @@ We investigated similar systems for design inspiration, as we expect this deadlo
 #### FUSE (File System in Userspace)
 FUSE is a kernel module and userspace library that facilitate running a file system in userspace on top of a Linux kernel. Applications can request regular file system operations on the mounted FUSE file system. These requests first go to the kernel, then the kernel forwards the requests to the userspace filesystem. This was of interest since, like our setup, it involves a privileged PD making requests of a less-privileged PD.
 
-```{image} images/fuse_diagram.png
+```{image} ../images/fuse_diagram.png
   :width: 600
 ```
 - Image from [Vangoor et al.][2]
@@ -57,7 +57,7 @@ QNX has similar IPC primitives to seL4, and the [QNX Manual][1] recommends arran
 > The Send/Receive/Reply IPC primitives allow the construction of deadlock-free systems with the observation of only a couple simple rules:
 > 1. Never have two threads send to each other.
 > 2. Always arrange your threads in a hierarchy, with sends going up the tree.
-> ```{image} images/qnx_ipc_tree.png
+> ```{image} ../images/qnx_ipc_tree.png
 > :width: 250
 > ```
 
@@ -130,14 +130,14 @@ The main disadvantage of this method is it will be slower than the shared-messag
 #### Example 1
 Some app requests a model state extraction while the FS is busy. The root task queues some extraction task, and notifies the FS' bound notification that there is work for it to do. Once the FS finishes the client request, it sees that it has work to do, and it calls the root task to get the work. It sends the extracted subgraph to the root task, and assuming this was the only piece of the model state that the root task was missing, now it replies to the app.
 
-```{image} figures/deadlock_avoidance_1.png
+```{image} ../figures/deadlock_avoidance_1.png
   :width: 800
 ```
 
 #### Example 2
 This also works if the FS was not busy when the root task has work for it. In that case, the FS is woken when the root task signals the work notification, and then the FS may complete the work in the same way.
 
-```{image} figures/deadlock_avoidance_2.png
+```{image} ../figures/deadlock_avoidance_2.png
   :width: 800
 ```
 

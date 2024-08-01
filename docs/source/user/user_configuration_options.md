@@ -13,7 +13,7 @@ When a resource server crashes or is terminated, the resource space cleanup poli
 
 For example, consider the following PD setup: 
 
-```{image} figures/resource_cleanup_model_state.png
+```{image} ../figures/resource_cleanup_model_state.png
   :width: 800
 ```
 

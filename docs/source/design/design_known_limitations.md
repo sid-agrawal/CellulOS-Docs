@@ -3,7 +3,7 @@ This page details undesired behaviours or missing pieces of the current system, 
 
 (target_limitations_badge_scalability)=
 ## Badge Scalability
-```{image} images/badge_bits.png
+```{image} ../images/badge_bits.png
   :width: 300
 ```
 We use the 64-bit badge value of endpoint capabilities to track their purpose - either as RDEs or as resources. For convenience and efficiency, all relevant information is stored / retrieved by masking the badge itself. However, this introduces a scalability problem, especially since we cannot have more than 255 resource types or resource spaces. Eventually, we should replace the badge value with some unique ID that can be used to find a corresponding data structure. For example, the badge value could be the ID for a hash table maintained by the corresponding resource server (or root task), and the value is a stucture containing the cap type, permissions, space ID, client ID, and object ID with large-enough fields for scalability.
