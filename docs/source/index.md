@@ -8,6 +8,7 @@ This wiki is currently under construction
 :maxdepth: 2
 :caption: User Guide
 user/getting_started
+user/spawning_pds
 user/user_configuration_options
 ```
 
