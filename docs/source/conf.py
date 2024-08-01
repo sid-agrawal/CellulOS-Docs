@@ -30,11 +30,14 @@ templates_path = ['_templates']
 
 # -- Options for HTML output
 
-html_theme = "sphinx_book_theme"
+html_theme = 'sphinx_book_theme'
 
 html_theme_options = {
     'navigation_depth': 2,
+    'home_page_in_toc': True
 }
+
+html_logo = 'images/OSmosis_Logo_noBG_border.png'
 
 # -- Options for EPUB output
 epub_show_urls = 'footnote'
