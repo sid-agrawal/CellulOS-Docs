@@ -1,0 +1,17 @@
+sequenceDiagram
+    participant RT
+    participant FS
+    participant App
+
+    App->>FS: create("/foo")
+    activate FS
+    FS->>FS: sel4gpi_store_reply_cap()
+    note over FS: FS crashes
+    FS->>RT: exit()
+    deactivate FS
+    activate RT
+    note over RT: Checks for reply cap <br> in FS' shared data page
+    note over RT: Moves reply cap from <br> FS CSpace to RT CSpace
+    RT-->>App: error
+    deactivate RT
+    note over RT, App: RT replies using the reply cap, wakes up the App

@@ -18,7 +18,7 @@ If PD1 wants to send a resource to PD2, it must have the PD2 capability to do so
 In contrast, if a resource server PD3 wants to give a resource from one of its resource spaces to PD2, it only needs PD2's ID. This is for a few reasons:
 - Resource servers usually do not have the PD capability for their clients, but they do know the client's ID because it is part of the badge of the client's RDE endpoint.
 - We consider resource servers to be trusted entities in the system, so we assume they will not maliciously send resources to PDs that have not requested them.
-- During the `give_resource` call, the root task verifies that the caller is truly the manager of the resource space from which it intends to give a resource. If a PD is not a resource server, then it should not have the `RESSPC` RDE, so it should not be able to create a resource space and its calls to `give_resource` will fail.
+- During the `give_resource` call, the root task verifies that the caller is truly the manager of the resource space from which it intends to give a resource. If a PD is not a resource server, then it should not have the `RESSPC` RDE, so it will not be able to create a resource space and its calls to `give_resource` will fail.
 
 ### Requests on a Resource
 Since the root task creates resources as badged versions of the resource server's endpoint, it will also receive invocations / requests for a particular resource. The badge will include the object ID, so the resource server can identify which resource is being invoked. You will most likely want to define a message protocol for your resource server, which uses the IPC buffer to identify the operation and parameters. If using `resource_server_utils`, then you must define the message protocol using NanoPB. 
@@ -51,3 +51,14 @@ Resource servers need to prepare a portable model state subgraph for `send_subgr
 3. Add nodes and edges to the subgraph using initialized model state and the functions from `model_exporting.h`.
     - You can add edges in two ways. The first way is to create two nodes, and add an edge between them with `add_edge`. Alternatively, you can avoid adding both nodes using `get_resource_id`, `get_pd_id`, etc. and the `add_edge_by_id` function. This adds edges without any endpoint node, which makes the subgraph incomplete, but it is ok if you expect the node to be added elsewhere. For example, the file server may include a map edge to a block resource node, expecting that the block resource node will already be added to the model state by the root task.
 4. Use the function `clean_model_state` to clean any local memory used for the model state, send the MO to the root task with `send_subgraph`, unnattach the MO from the local address space, and deallocate the MO. The utility function `resource_server_extraction_finish` will handle this step.
+
+(target_resource_server_storing_reply)=
+## Storing Reply Capabilities
+
+If a resource server crashes while it is in the process of serving a client request, then the client will remain blocked on the resource server's endpoint indefinitely. To handle this issue, resource servers should store the [reply cap](target_glossary_reply_cap) immediately after receiving a request from a client. They should use `sel4gpi_store_reply_cap`, which moves the reply cap from the resource server's TCB to its CSpace, and stores a reference to it in the PD's [shared data page](target_glossary_shared_data). If you are using the `resource_server_utils`, the main loop will take care of this for you.
+
+Once the server has completed the request, it clears the reply capability from the shared data page using `sel4gpi_clear_reply_cap`. Thus if the resource server crashes while serving a request, the root task is able to use the reply capability to reply with an error message to the waiting client.
+
+```{image} ../figures/storing_reply_cap.png
+:width: 500px
+```

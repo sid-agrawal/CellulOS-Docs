@@ -7,12 +7,18 @@ Some terms are specific to the implementation, or differ from the terms used in 
 > seL4 provides threads to represent an execution context.
 > [...]
 >  Without MCS, processor time is also represented by the thread abstraction. A thread is represented in seL4 by its thread control block object (TCB).
+    - Note that  CellulOS uses the non-MCS version of the kernel, so the second sentence applies.
 (target_glossary_asid_pool)=
 - **ASID Pool**: ASID Pools are repositories for address space identifiers, where a number of pools may exist in the system, and each is a subset of a virtual ASID space. From the [seL4 spec](https://sel4.systems/Info/Docs/seL4-spec.pdf):
 > ASIDs are associated with page directories (PDs) and define the virtual address space of a thread. [...] Since ARM hardware supports only 255 different ASIDs, seL4 on ARM supports the concept of virtual ASIDs that are mapped to hardware ASIDS managed in a two-level structure. The user manages only the second level of this structure: the asid pool. An asid pool can be seen as a set of virtual ASIDs that can be connected to and disconnected from page directories.
+(target_glossary_reply_cap)=
+- **Reply Cap**: When a PD calls `seL4_Call` on an endpoint and the message is delivered to the receiver, the kernel creates a temporary "reply endpoint" and places the capability in the receiver's TCB (since CellulOS uses the non-MCS version of the kernel). The sender waits on the temporary endpoint, so the receiver can reply using the reply capability to finish the call.
 
 ## General CellulOS Terms
+- **Root Task**: The trusted PD that runs above the seL4 microkernel and orchestrates the system's OSmosis functionality.
 - **RDE** (Resource Directory Entry): This is the implementation analogue to a request edge. The **resource directory** is the data structure that maintains a PD's request edges, and a **resource directory entry** contains the badged endpoint for a resource server. An RDE is for a particular resource type and resource space. Conceptually, invoking the badged endpoint is making a request along a request edge.
+(target_glossary_shared_data)=
+- **PD's Shared Data Page**: Every PD has a single page shared with the root task. This page mostly consists of the initialization data, like the resource directory data structure.
 
 ## Capability Types
 - **Capability Type**: In CellulOS we refer to "capability types", the analogue of "resource types", which are actually enum values that can be set in the badge of a badged endpoint capability. They are not types of capabilities in the raw seL4 sense, but the root task treats them as resource types. The core capability types are detailed in the entries below. The core capability types are handled by their respective components in the root task. Other capability types can be created dynamically during system operation, and are handled by resource servers.
