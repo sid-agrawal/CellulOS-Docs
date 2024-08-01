@@ -1,4 +1,8 @@
-# Preventing Deadlocks in CellulOS
+# Preventing Deadlocks with Async Messages
+
+```{note}
+The original GitHub discussion on this topic can be found [here](https://github.com/sid-agrawal/OSmosis/discussions/13#discussion-6817728).
+```
 
 PDs frequently make requests to the root task via `seL4_Call`. The root task also needs to send occasional messages to PDs in the following scenarios:
 - Request a subgraph of the model state from a resource manager

@@ -1,0 +1,78 @@
+flowchart TB
+ subgraph Disk1[" "]
+        blockserver1["Block Server 1"]
+        disk1("Disk 1")
+        block1("Block 1")
+  end
+ subgraph Disk2[" "]
+        blockserver2["Block Server 2"]
+        disk2("Disk 2")
+        block2("Block 2")
+  end
+ subgraph FS[" "]
+        fs["File System"]
+        filespace("File Space")
+        file1("File 1")
+        file2("File 2")
+  end
+ subgraph DB[" "]
+        db["Database Server"]
+        database("Database")
+        table1("Table 1")
+  end
+ subgraph Legend["Legend"]
+    direction LR
+        legendPD["PD"]
+        legendRS("Space")
+        legendR("Resource")
+  end
+    legendPD -- hold --> legendRS
+    legendPD -- request --> legendPD
+    legendR -. map .-> legendR
+    legendR -. subset .-> legendRS
+    block1 -.-> disk1
+    blockserver1 --> disk1 & block1
+    block2 -.-> disk2
+    blockserver2 --> disk2 & block2
+    fs --> filespace & file1 & file2 & block1 & block2 & blockserver1 & blockserver2
+    filespace -.-> disk1 & disk2
+    file2 -.-> filespace & block2
+    file1 -.-> filespace & block1
+    db --> database & table1 & fs
+    table1 -.-> database & file1
+    database -.-> filespace
+    app["APP"] --> db & table1
+     blockserver1:::PD
+     disk1:::RS
+     block1:::R
+     blockserver2:::PD
+     disk2:::RS
+     block2:::R
+     fs:::PD
+     filespace:::RS
+     file1:::R
+     file2:::R
+     db:::PD
+     database:::RS
+     table1:::R
+     legendPD:::PD
+     legendRS:::RS
+     legendR:::R
+     app:::PD
+    classDef PD fill:#df8efa,stroke:#be03fc,stroke-width:1px
+    classDef RS fill:#fae48e,stroke:#fac802,stroke-width:1px
+    classDef R fill:#fcbb58,stroke:#fa9702,stroke-width:1px
+    linkStyle 1 stroke:#AA00FF,fill:none
+    linkStyle 3 stroke:#FF6D00,fill:none
+    linkStyle 4 stroke:#FF6D00,fill:none
+    linkStyle 7 stroke:#FF6D00,fill:none
+    linkStyle 15 stroke:#AA00FF,fill:none
+    linkStyle 16 stroke:#AA00FF,fill:none
+    linkStyle 19 stroke:#FF6D00,fill:none
+    linkStyle 21 stroke:#FF6D00,fill:none
+    linkStyle 23 stroke:#000000,fill:none
+    linkStyle 24 stroke:#000000,fill:none
+    linkStyle 25 stroke:#AA00FF,fill:none
+    linkStyle 26 stroke:#FF6D00,fill:none
+    linkStyle 29 stroke:#AA00FF
+

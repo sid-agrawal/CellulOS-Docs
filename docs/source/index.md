@@ -7,6 +7,7 @@ This wiki is currently under construction
 ```{toctree}
 :caption: User Guide
 getting_started
+user_configuration_options
 ```
 
 ```{toctree}
@@ -19,7 +20,7 @@ resource_servers
 :caption: Design
 design_overview
 design_apps
-deadlocks
+design_decisions
 design_quirks
 design_known_limitations
 ```

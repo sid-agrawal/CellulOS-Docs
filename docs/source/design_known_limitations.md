@@ -31,6 +31,7 @@ When a PD requests a model extraction, the root task iterates over all PDs in th
         - If the subgraph includes resources from other resource servers, the root task will need to recursively reach out to *those* resource servers as well
     - *If the resource is a PD*: This is still an open question, do we recursively dump the PD as well?
 
+(target_limitations_runtime_metrics)=
 ### Runtime Metrics
 The system does not currently support calculating the model metrics (RSI & FR) at runtime. It would be possible to do so if we modify the model extraction utility to store the graph in a traversible data structure and implement the calculation algorithms.
 
