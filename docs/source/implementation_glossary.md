@@ -7,6 +7,9 @@ Some terms are specific to the implementation, or differ from the terms used in 
 > seL4 provides threads to represent an execution context.
 > [...]
 >  Without MCS, processor time is also represented by the thread abstraction. A thread is represented in seL4 by its thread control block object (TCB).
+(target_glossary_asid_pool)=
+- **ASID Pool**: ASID Pools are repositories for address space identifiers, where a number of pools may exist in the system, and each is a subset of a virtual ASID space. From the [seL4 spec](https://sel4.systems/Info/Docs/seL4-spec.pdf):
+> ASIDs are associated with page directories (PDs) and define the virtual address space of a thread. [...] Since ARM hardware supports only 255 different ASIDs, seL4 on ARM supports the concept of virtual ASIDs that are mapped to hardware ASIDS managed in a two-level structure. The user manages only the second level of this structure: the asid pool. An asid pool can be seen as a set of virtual ASIDs that can be connected to and disconnected from page directories.
 
 ## General CellulOS Terms
 - **RDE** (Resource Directory Entry): This is the implementation analogue to a request edge. The **resource directory** is the data structure that maintains a PD's request edges, and a **resource directory entry** contains the badged endpoint for a resource server. An RDE is for a particular resource type and resource space. Conceptually, invoking the badged endpoint is making a request along a request edge.

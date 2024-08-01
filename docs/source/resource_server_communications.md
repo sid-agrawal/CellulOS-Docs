@@ -13,6 +13,13 @@ When a resource server wants to create a resource, it notifies the root task thr
 
 To send a resource to another PD, the resource server again makes a request of the root task. The root task has the resource server's endpoint, so it badges the endpoint directly into the CSpace of the recipient PD. The root task returns the slot number in the recipient's CSpace to the resource server, and the resource server passes the slot number to the client PD when it responds to the request.
 
+#### Aside: Sending vs Giving Resources
+If PD1 wants to send a resource to PD2, it must have the PD2 capability to do so. This prevents PDs from sending resources to PDs that they should not be allowed to.
+In contrast, if a resource server PD3 wants to give a resource from one of its resource spaces to PD2, it only needs PD2's ID. This is for a few reasons:
+- Resource servers usually do not have the PD capability for their clients, but they do know the client's ID because it is part of the badge of the client's RDE endpoint.
+- We consider resource servers to be trusted entities in the system, so we assume they will not maliciously send resources to PDs that have not requested them.
+- During the `give_resource` call, the root task verifies that the caller is truly the manager of the resource space from which it intends to give a resource. If a PD is not a resource server, then it should not have the `RESSPC` RDE, so it should not be able to create a resource space and its calls to `give_resource` will fail.
+
 ### Requests on a Resource
 Since the root task creates resources as badged versions of the resource server's endpoint, it will also receive invocations / requests for a particular resource. The badge will include the object ID, so the resource server can identify which resource is being invoked. You will most likely want to define a message protocol for your resource server, which uses the IPC buffer to identify the operation and parameters. If using `resource_server_utils`, then you must define the message protocol using NanoPB. 
 
