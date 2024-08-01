@@ -47,3 +47,9 @@ Then we can use the same directive in markdown like this:
     ```{directive_name} arg0 arg1
         :option_name: option_value
     ```
+
+## Troubleshooting
+
+### Missing pages in sidebar
+Have you recently added a new page, and it appears in the sidebar on the homepage, but mysteriously disappears from the sidebar when you navigate to some other pages?
+Try a `make clean` and then `make html` again, and the issue should disappear.
