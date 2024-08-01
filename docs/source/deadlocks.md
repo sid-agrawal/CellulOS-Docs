@@ -9,7 +9,7 @@ PDs frequently make requests to the root task via `seL4_Call`. The root task als
 
 With a single-threaded root task, we could easily reach a deadlock if we do not design carefully. For example, consider the following scenario:
 
-```{image} images/model_extraction_deadlock.png
+```{image} figures/model_extraction_deadlock.png
   :width: 700px
 ```
 
@@ -126,15 +126,15 @@ The main disadvantage of this method is it will be slower than the shared-messag
 #### Example 1
 Some app requests a model state extraction while the FS is busy. The root task queues some extraction task, and notifies the FS' bound notification that there is work for it to do. Once the FS finishes the client request, it sees that it has work to do, and it calls the root task to get the work. It sends the extracted subgraph to the root task, and assuming this was the only piece of the model state that the root task was missing, now it replies to the app.
 
-```{image} images/deadlock_avoidance_example_1.png
-  :width: 600
+```{image} figures/deadlock_avoidance_1.png
+  :width: 800
 ```
 
 #### Example 2
 This also works if the FS was not busy when the root task has work for it. In that case, the FS is woken when the root task signals the work notification, and then the FS may complete the work in the same way.
 
-```{image} images/deadlock_avoidance_example_2.png
-  :width: 600
+```{image} figures/deadlock_avoidance_2.png
+  :width: 800
 ```
 
 [1]: https://swd.de/Support/Documents/Manuals/Neutrino-Microkernel-System-Architecture/Chapter-2-The-QNX-Neutrino-Microkernel-Part-2/

@@ -1,0 +1,32 @@
+sequenceDiagram
+    participant App1
+    participant RT
+    participant Kernel
+    participant FS
+    participant App2
+
+    activate FS
+    FS->>Kernel: seL4_Wait(fs_ep)
+
+    App1->>RT: extract_model_state()
+    activate RT
+    RT-)Kernel: seL4_Signal(fs_notification)
+    deactivate RT
+
+
+    Kernel-->>FS: fs_notification badge
+    note over Kernel, FS: The fs_notification is bound to the<br/>FS' TCB, so the kernel wakes the FS
+ 
+    FS->>RT: get_work()
+    activate RT
+    RT-->>FS: model extraction task
+    deactivate RT
+
+    FS ->>RT: send_subgraph(...)
+    activate RT
+    RT-->>App1: model state
+    RT-->>FS: success
+    deactivate RT
+
+    FS->>Kernel: seL4_Wait(fs_ep)
+    deactivate FS

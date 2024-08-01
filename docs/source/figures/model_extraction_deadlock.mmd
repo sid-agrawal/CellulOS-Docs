@@ -1,0 +1,16 @@
+sequenceDiagram
+    participant App1
+    participant RT
+    participant FS
+    participant App2
+
+    App2->>FS: create("/foo")
+    activate FS
+    App1->>RT: extract_model_state()
+    activate RT
+    RT-xFS: get_subgraph()
+    FS-xRT: give_resource(App2, file) 
+    deactivate RT
+    deactivate FS
+
+    note over RT, FS: Both PDs wait on each other

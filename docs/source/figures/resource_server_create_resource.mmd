@@ -1,0 +1,23 @@
+sequenceDiagram
+    participant App
+    participant RT as Root Task
+    participant RS as Resource Server
+
+
+    App->>RS: create_resource(ep)
+    activate RS
+
+    RS ->>RT: create_resource(resource space, resource id)
+    activate RT
+    note over RT: Tracks resource metadata
+    RT -->> RS: 
+    deactivate RT
+
+    RS ->>RT: give_resource(resource space, resource id, app id)
+    activate RT
+    note over RT: Badges the server's EP into <br> the App's cspace
+    RT -->> RS: CSpace slot (app's CSpace)
+    deactivate RT
+
+    RS-->>App: CSpace slot (app's CSpace)
+    deactivate RS

@@ -5,7 +5,7 @@
 The resource server listens on the endpoint that it provided to the root task when it [created its resource space](target_resource_server_creating_space). Any PD with an RDE for that space will have a badged version of the same endpoint, and thus can send requests to the resource server. The resource server will know that the request came from an RDE because the badge will include a placeholder `BADGE_OBJ_ID_NULL` value for the object ID. Usually, a request from an RDE is to create and/or allocate a resource.
 
 ### Creating a Resource
-```{image} images/resource_server_create_resource.png
+```{image} figures/resource_server_create_resource.png
   :width: 600
 ```
 
@@ -26,8 +26,8 @@ The root task may occasionally need to notify a resource server of an event, or 
 3. Resource space destroy: Informs a resource sesrver that one of its resource spaces is destroyed. This can happen due to a cleanup policy. The resource server is expected to clean up any resources or metadata associated with the resource space. For example, if the file server is notified that its file resource space is destroyed, then it should release all of the blocks that the file system was using.
 
 ### Receiving Work Requests
-```{image} images/deadlock_avoidance_example_1.png
-  :width: 600
+```{image} figures/deadlock_avoidance_1.png
+  :width: 800
 ```
 
 Every resource server has a notification *bound* to its TCB, meaning that signals to the bound notification will be received on the resource server's regular endpoint. When this happens, the sender badge has the special `NOTIF_BADGE` value. This means that the root task has queued some work for the resource server and signalled the notification (shown by the `seL4_Signal` call in the sequence diagram above). The resource server must actually retrieve the work will the `get_work` call, which returns a NanoPB message with the work type and corresponding parameters. As an optimization, the message may include several sets of parameters, corresponding to several work requests of the same type.

@@ -1,0 +1,31 @@
+sequenceDiagram
+    participant App
+    participant RT as Root Task
+    participant RS as Resource Server
+
+
+    note over App: App creates the resource server PD <br> with necessary resources & RDEs
+    App->>RT: start_pd(resource_server_PD)
+    activate RT
+    activate RS
+    note over RS: Starts with parent ID and parent EP as arguments
+    RT-->>App: 
+    deactivate RT
+
+    RS->>RT: alloc_endpoint()
+    activate RT
+    note over RT: Creates a new endpoint, adds it to resource server cspace
+    RT-->>RS: server_ep_slot
+    deactivate RT
+
+    RS->>RT: create_resource_space(type_name, parent_id, server_ep)
+    activate RT
+    note over RT: Finds or assigns the resource type code <br> for the given type_name
+    note over RT: Badges the server_ep as an RDE <br> in App's resource directory
+    RT-->>RS: resource_space_cap_slot, space_id, type_code
+    deactivate RT
+
+    RS-)App: notify_started(type_code, space_id)
+    deactivate RS
+
+    note over App: Gets the resource server RDE <br> by type code and space ID
