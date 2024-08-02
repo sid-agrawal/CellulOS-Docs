@@ -18,6 +18,7 @@ Some terms are specific to the implementation, or differ from the terms used in 
 - **Root Task**: The trusted PD that runs above the seL4 microkernel. In the sel4test project, the root task includes the *test driver* thread, which sets up tests and listens for any messages / interrupts / test results. When CellulOS functionality is enabled, the root task has a second thread which is the *GPI Server*.
 (target_glossary_gpi_server)=
 - **GPI Server** (General Purpose Isolation Server): GPI is an older name for CellulOS, and the GPI Server is the orchestration point for all CellulOS functionality. When we talk about PDs calling the root task, it is the GPI Server's endpoint that they communicate with.
+(target_glossary_rde)=
 - **RDE** (Resource Directory Entry): This is the implementation analogue to a request edge. The **resource directory** is the data structure that maintains a PD's request edges, and a **resource directory entry** contains the badged endpoint for a resource server. An RDE is for a particular resource type and resource space. Conceptually, invoking the badged endpoint is making a request along a request edge.
 (target_glossary_shared_data)=
 - **PD's Shared Data Page**: Every PD has a single page shared with the root task, which contains the `osm_pd_shared_data_t` struct. This page mostly consists of the initialization data, like the resource directory data structure.

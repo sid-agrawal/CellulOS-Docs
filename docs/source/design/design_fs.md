@@ -44,3 +44,4 @@ The question of whether / how to show file names in the model state is not fully
 ## File Client
 
 The file client `/apps/xv6fs/src/fs_client/fs_client.c` is the compatibility layer between libc and the file server. The file client tracks file descriptors at a per-PD level, so that libc may refer to file descriptors, and the file client converts an FD to a file resource before forwarding the request to the file server.
+- Since we do not model an FD as a resource, two processes cannot share a file offset (eg. as a parent and child would after a fork). A file offset is not an inherent property of a file, but rather a state being tracked by a process. A shared file offset could be modeled by something more general like “shared variable” resource, or even a memory object.

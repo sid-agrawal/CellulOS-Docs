@@ -18,6 +18,7 @@ user/cellulos_tests
 :caption: Development
 development/development_overview
 development/resource_servers
+development/resources
 development/troubleshooting
 ```
 

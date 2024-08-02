@@ -62,3 +62,9 @@ Once the server has completed the request, it clears the reply capability from t
 ```{image} ../figures/storing_reply_cap.png
 :width: 500px
 ```
+
+```{note}
+For resource servers to call `sel4gpi_store_reply_cap`, they need access to their own CSpace, and thus they need their own CSpace root capability. The GPI Server does not currently differentiate between resource server and app PDs, so all PDs get access to their CSpace, although apps do not use it. Eventually, apps should not have access to their CSpace at all. Two potential solutions:
+- The [PD configuration](target_spawning_pds) includes an option to specify whether a PD is a resource server or not, and only explicit resource server PD get access to their CSpace.
+- Resource servers get a special CNode to store their reply cap, and only get access to this CNode, but not their entire CSpace.
+```
