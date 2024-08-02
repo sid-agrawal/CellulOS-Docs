@@ -15,6 +15,7 @@ Exit using `ctrl-a-x`.
 
 For instructions on using GDB with Qemu, see [debugging](target_debugging_gdb).
 
+(target_booting_assumptions)=
 ## Booting on Odroid-C4
 Assumptions:
 - The host computer is running Linux.
