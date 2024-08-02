@@ -21,6 +21,7 @@ development/development_overview
 development/resource_servers
 development/resources
 development/troubleshooting
+development/endpoint_component
 ```
 
 ```{toctree}
@@ -31,4 +32,5 @@ design/design_apps
 design/design_decisions
 design/design_quirks
 design/design_known_limitations
+design/unified_entry_point
 ```

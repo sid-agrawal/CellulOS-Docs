@@ -41,3 +41,5 @@ We will differentiate between three cases, 1) PDs with different code sections, 
 		2) We'd want to keep all the musllibc contents intact when thread-like PDs exit, so the only thing that needs to be done is probably to call the OSmosis PD cleanup.
 
 I will update this if I discover new things during implementation.
+
+<!-- PDs could provide an additional function to call before `main` to do any additional setup -->
