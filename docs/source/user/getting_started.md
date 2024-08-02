@@ -1,8 +1,8 @@
 # Getting Started
 
-<!-- ```{toctree}
-:maxdepth: 2
-``` -->
+```{toctree}
+booting
+```
 
 <!---
 Some, things that would be good to add here:

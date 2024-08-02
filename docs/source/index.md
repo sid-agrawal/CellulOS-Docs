@@ -10,6 +10,7 @@ This wiki is currently under construction
 user/getting_started
 user/spawning_pds
 user/user_configuration_options
+user/cellulos_tests
 ```
 
 ```{toctree}
@@ -17,6 +18,7 @@ user/user_configuration_options
 :caption: Development
 development/development_overview
 development/resource_servers
+development/troubleshooting
 ```
 
 ```{toctree}
