@@ -18,10 +18,11 @@ For instructions on using GDB with Qemu, see [debugging](target_debugging_gdb).
 ## Booting on Odroid-C4
 Assumptions:
 - The host computer is running Linux.
-- The Odroid's UART is connected to `/dev/ttyUSB0`.
+- The Odroid's UART is connected to `/dev/ttyUSB0` using a USB to TTL Serial Adapter.
     - You can inspect the connected devices with `sudo dmesg | grep tty`.
+    - We use the `DTECH USB to TTL Serial Adapter with PL2303TA`.
 - You have a USB smart switch connected to `/dev/ttyUSB1`.
-    - We use the `LCUS-1 5V USB Relay Module CH340 USB Control Switch` model.
+    - We use the `LCUS-1 5V USB Relay Module CH340 USB Control Switch`.
 
 ### Initial Setup
 ```{attention}
@@ -48,7 +49,7 @@ echo -en '\xa0\x01\x00\xa1' > /dev/ttyUSB1 # Second try may be required
 echo -en '\xa0\x01\x01\xa2' > /dev/ttyUSB1 # Power on
 echo -en '\xa0\x01\x01\xa2' > /dev/ttyUSB1 # Second try
 ```
-3. Wait for uboot to be ready for input (indicated wtih `=>`), then load the image with tftpboot: 
+3. Wait for uboot to be ready for input (indicated by `=>`), then load the image with tftpboot: 
 ```
 tftpboot 0x20000000 <host_ip>:image; go 0x20000000
 ```

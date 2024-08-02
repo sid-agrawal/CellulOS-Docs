@@ -1,12 +1,17 @@
 # Known Limitations
 This page details undesired behaviours or missing pieces of the current system, pending future development.
 
+## Scalability
+
 (target_limitations_badge_scalability)=
-## Badge Scalability
+### Badge Scalability
 ```{image} ../images/badge_bits.png
   :width: 300
 ```
 We use the 64-bit badge value of endpoint capabilities to track their purpose - either as RDEs or as resources. For convenience and efficiency, all relevant information is stored / retrieved by masking the badge itself. However, this introduces a scalability problem, especially since we cannot have more than 255 resource types or resource spaces. Eventually, we should replace the badge value with some unique ID that can be used to find a corresponding data structure. For example, the badge value could be the ID for a hash table maintained by the corresponding resource server (or root task), and the value is a stucture containing the cap type, permissions, space ID, client ID, and object ID with large-enough fields for scalability.
+
+### Resource Directory Scalability
+The resource directory is maintained as a simple, static array in the PD's [shared data page](target_glossary_shared_data). It has a static maximum of 8 non-core resource types, and 8 spaces per resource type, for a particular PD's resource directory. A dynamic data structure would be more difficult since the shared data page is used by two PDs, so pointers would need to be adjusted across address spaces.
 
 ## Garbage Accumulation
 We have tried to eliminate garbage accumulation for long term use of the system, but there are a small number of known sources of garbage.
@@ -40,7 +45,21 @@ The system does not currently support calculating the model metrics (RSI & FR) a
 ### Fault Handler Dependencies
 The implementation does not explicitly track a "fault edge" between a PD and its fault handler, so it is unable to clean up a PD if its fault handler crashes. We suspect that this would be a non-configurable option to recursively follow fault edges and clean up all PDs along the path.
 
+### Resource Space Metadata
+The system does not currently track where metadata is stored for particular resource spaces. At a finer granularity, we might even want to track where metadata is stored for particular edges of the model. If we tracked a map relation from resource spaces to metadata, then we would count this relation as another potential dependency for resource space cleanup.
+
 ## PD Creation
 
 ### Shared ADS Configuration Options
 For scenarios with partially-shared address spaces, the configuration options allow for particular regions to be shared (same physical pages) or disjoint (separate physical pages). If a region is shared, it will be shared *at the moment the second ADS is created*. If one of the address spaces later modifies the region (eg. by replacing one or more physical pages), the second address space will not be updated to match. We are unsure whether or not we will add the option to update the shared regions in this way.
+
+## Sample Apps
+
+### File System
+We have made some simplying assumptions for the file system:
+- The file system assumes that only one thread accesses it (which will remain true as long as the file server is the only PD that may access it). This means that any logic related to file locking or mutual exclusion has been removed.
+- The file system's logging mechanism is disabled, due to the assumption that the file system is unrecoverable if the system crashes (since it is stored in memory).
+- The file server's API does not allow for any operations related to file ownership or permissions, as we expect this functionality to be handled by capability permissions in the future.
+    - Since there are no permissions, any PD with an RDE for a file namespace is assumed to have full permissions on any file within the namespace.
+
+Another limitation is that the file server does not yet show file names in the model state, and instead it shows namespaces as file resource spaces that map to the default file resource space. It should be possible to show the file names in the model state without explicitly tracking them as resources with capabilities in the system.
