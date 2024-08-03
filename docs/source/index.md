@@ -32,5 +32,4 @@ design/design_apps
 design/design_decisions
 design/design_quirks
 design/design_known_limitations
-design/unified_entry_point
 ```

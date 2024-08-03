@@ -106,6 +106,15 @@ A CPU may need higher priviledges to access a few system registers. In seL4, thi
 ### RDE Configuration
 The created PD can be given all or a subset of the RDEs which the creator PD can request from. The convenience function [sel4gpi_add_rde_config()](https://github.com/sid-agrawal/sel4-gpi/blob/cellulos/libsel4gpi/include/sel4gpi/pd_creation.h#L275) can be used to specify that an RDE of a certain resource type and namespace should be shared with the created PD.
 
+### Sharing Resources
+Sharing VMR resources are handled by the ADS configuration system, as described above. Other individual resources, such as MOs or files can be shared using the `pd_client_send_cap()` API call, which currently must be done outside of the `pd_creation` module.
+
+For convenience, all resources of a certain type can be shared in one API call, which is configured by using the `gpi_res_type_cfg` option. This is a list of resource types to be shared in bulk with the created PD. 
+
+```{warning}
+This bulk sharing of resources by type currently only allows sharing of MO resources. While theoretically possible, it currently does not make sense to send all of the creator PD's CPU, ADS, EP resources to the created PD. For non-core resources (e.g. resources not managed by the Root Task), this is a [limitation](target_known_limits_non_core_res_transfer) of CellulOS, where complete tracking of non-core resources has not yet been implemented.
+```
+
 ### Fault Handling
 The creator PD can specify a fault handler for the created PD by setting the fault endpoint in the configuration. If none are specified, a new fault endpoint will be allocated for the PD, which the creator can retrieve to listen on.
 
@@ -146,5 +155,5 @@ In CellulOS, threads with isolated stacks exist in a separate ADS from the main 
 
 
 ```{warning}
-Due to the secondary thread existing in a separate ADS, any additional changes to the main thread's ADS that should be reflected in the secondary thread's ADS needs to be done manually by the main thread (e.g. by mapping a VMR in both ADSes). 
+Due to the secondary thread existing in a separate ADS, any additional changes to the main thread's ADS that should be reflected in the secondary thread's ADS needs to be done manually by the main thread (e.g. by mapping a VMR in both ADSes). This is a [known limitation](target_known_limits_ads_config) of Cellulos.
 ```

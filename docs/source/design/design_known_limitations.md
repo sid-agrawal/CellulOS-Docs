@@ -50,8 +50,24 @@ The system does not currently track where metadata is stored for particular reso
 
 ## PD Creation
 
+(target_known_limits_ads_config)=
 ### Shared ADS Configuration Options
 For scenarios with partially-shared address spaces, the configuration options allow for particular regions to be shared (same physical pages) or disjoint (separate physical pages). If a region is shared, it will be shared *at the moment the second ADS is created*. If one of the address spaces later modifies the region (eg. by replacing one or more physical pages), the second address space will not be updated to match. We are unsure whether or not we will add the option to update the shared regions in this way.
+
+## Non-Core Resource Transfer
+(target_known_limits_non_core_res_transfer)=
+### Sending Non-Core Resources Between Non-Server PDs
+Core resources include those managed by the root task (MO, ADS, CPU, EP). Sending resources between non-server PDs are done via an API call to the PD component within the root task. Non-server PDs are free to send each other core resources, which will be explicitly tracked by the root task. 
+
+However, sending resources managed by non-root-task servers, through the PD component are not tracked, since the root task (a) knows nothing about these resources and (b) cannot unwrap a resource endpoint that another server-PD is listening on. 
+
+Theoretically, it is possible to send non-core resources between non-server PDs, however, due to lack of refcounting, this can cause many issues when the resources are freed.
+
+Supporting this type of resource transfer (with tracking) is not a difficult engineering task, however, the design of how the resource servers may be coordinated with the root task in tracking a non-core resource transfer needs to be considered more deeply.
+
+```{note}
+This is not an issue for transfer of non-core resources from a server-PD to a other PDs, as the server PD can contact the root task through designated API calls to request this transfer.
+```
 
 ## Sample Apps
 
@@ -63,3 +79,4 @@ We have made some simplying assumptions for the file system:
     - Since there are no permissions, any PD with an RDE for a file namespace is assumed to have full permissions on any file within the namespace.
 
 Another limitation is that the file server does not yet show file names in the model state, and instead it shows namespaces as file resource spaces that map to the default file resource space. It should be possible to show the file names in the model state without explicitly tracking them as resources with capabilities in the system.
+
