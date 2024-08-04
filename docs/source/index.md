@@ -11,6 +11,7 @@ user/getting_started
 user/spawning_pds
 user/user_configuration_options
 user/cellulos_tests
+user/model_state
 user/running_benchmarks
 ```
 

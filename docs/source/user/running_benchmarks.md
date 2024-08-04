@@ -1,3 +1,4 @@
+(target_benchmarking)=
 # Benchmarking
 
 The benchmarking script located at `/scripts/bench` builds and runs a series of images for benchmarking various CellulOS operations on the Odroid-C4 board.
@@ -87,6 +88,8 @@ test_configurations = [
 
 selected_tests = test_configurations
 ```
+- If you set `n_reboots` to 1, then the script will enable `GPIBenchmarkMultiple`.
+- If the system type is `system_type_osm`, then the script will enable `GPIServerEnabled`, otherwise it will be disabled.
 
 ## Running Benchmarks
 This makes the assumption that your environment is set up as described in [booting](target_booting_assumptions).
