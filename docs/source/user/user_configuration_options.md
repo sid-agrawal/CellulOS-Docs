@@ -5,7 +5,7 @@ This section describes the CellulOS configuration options that can be specified 
 (target_configuration_options)=
 ## Option Overview
 - `GPIPDDeletionDepth`: The PD deletion depth for resource space cleanup, see [Resource Space Cleanup Policy Depth](target_configuration_cleanup_policy).
-- `GPIPDDeletionDepth`: The PD deletion depth for resource space cleanup, see [Resource Space Cleanup Policy Depth](target_configuration_cleanup_policy).
+- `GPIRSDeletionDepth`: The RS deletion depth for resource space cleanup, see [Resource Space Cleanup Policy Depth](target_configuration_cleanup_policy).
 - `GPIServerEnabled`: A boolean option controlling whether or not to run the [GPI server](target_glossary_gpi_server), see also [test types](target_system_test_types).
 - `GPIBenchmarkMultiple`: A boolean option controlling whether or not to run benchmark tests (test with the `GPIBM` prefix) multiple times in one boot. If enabled, each benchmark test will be run 500 times.
 
