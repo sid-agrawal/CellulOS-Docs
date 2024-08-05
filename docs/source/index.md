@@ -8,7 +8,7 @@ This wiki is currently under construction
 :maxdepth: 2
 :caption: User Guide
 user/getting_started
-user/spawning_pds
+user/executing_code
 user/user_configuration_options
 user/cellulos_tests
 user/model_state

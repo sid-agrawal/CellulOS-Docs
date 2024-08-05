@@ -9,6 +9,7 @@ This section describes the CellulOS configuration options that can be specified 
 - `GPIServerEnabled`: A boolean option controlling whether or not to run the [GPI server](target_glossary_gpi_server), see also [test types](target_system_test_types).
 - `GPIBenchmarkMultiple`: A boolean option controlling whether or not to run benchmark tests (test with the `GPIBM` prefix) multiple times in one boot. If enabled, each benchmark test will be run 500 times. This option will be handled by the [benchmarking script](target_benchmarking).
 - `GPIExtractModel`: A boolean option controlling whether or not to extract the model state during tests. To use this option, tests should call `extract_model` from `test_shared.h`. All [system tests](target_system_tests), except for the benchmarks, will print a model state if this is enabled.
+- `GPIVmmImplementation`: String defining which VMM implementation to compile, only one of `sel4test-vmm` and `osm-vmm` may be compiled at a time.
 
 (target_configuration_cleanup_policy)=
 ## Resource Space Cleanup Policy Depth

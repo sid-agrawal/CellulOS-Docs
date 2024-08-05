@@ -39,6 +39,7 @@ Processing elevates the model state from implementation-level to model-level. Fo
         1. The link should look like this: `https://drive.google.com/file/d/<file_id>/view?usp=drive_link`.
         2. Replace `file/d/` with `uc?id=`.
         3. Replace `/view?usp=drive_link` with `&export=download`.
+    - Alternatively, in Google Sheets, clicking `File > Publish to the web`, and setting the link type to `CSV` will generate URL that Neo4j can access.
     - Note if using Google Drive: If you upload a file with the same name as a previous file and select 'Replace existing file', the download link should remain the same. Occasionally, if the file being replaced is several days old, the link will need to be updated.
 2. Paste the public links as strings into the `public_urls` array in `import_csv.py`.
 3. Import CSV to Neo4j: Run `python import_csv.py <idx>`, replacing `<idx>` with the index into the `public_urls` array of the CSV you want to import.
