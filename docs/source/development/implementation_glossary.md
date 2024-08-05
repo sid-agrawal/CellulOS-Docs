@@ -15,6 +15,9 @@ Some terms are specific to the implementation, or differ from the terms used in 
 - **Reply Cap**: When a PD calls `seL4_Call` on an endpoint and the message is delivered to the receiver, the kernel creates a temporary "reply endpoint" and places the capability in the receiver's TCB (since CellulOS uses the non-MCS version of the kernel). The sender waits on the temporary endpoint, so the receiver can reply using the reply capability to finish the call.
 
 ## General CellulOS Terms
+<mark><-- May be here or somewhere we need to add diagram of the system that shows seL4, i
+tRT and the different components in it </mark>
+
 - **Root Task**: The trusted PD that runs above the seL4 microkernel. In the sel4test project, the root task includes the *test driver* thread, which sets up tests and listens for any messages / interrupts / test results. When CellulOS functionality is enabled, the root task has a second thread which is the *GPI Server*.
 (target_glossary_gpi_server)=
 - **GPI Server** (General Purpose Isolation Server): GPI is an older name for CellulOS, and the GPI Server is the orchestration point for all CellulOS functionality. When we talk about PDs calling the root task, it is the GPI Server's endpoint that they communicate with.
