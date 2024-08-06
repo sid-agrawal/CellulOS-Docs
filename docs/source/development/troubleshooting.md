@@ -1,11 +1,6 @@
 # Troubleshooting Development Errors
 
-```{attention}
-WIP, things to be added:
-- common pitfall with the ADS and VMR client contexts
-- "insufficient memory" VKA error that occurs due to freeing before all caps are deleted
-```
-
+# Debugging Tools
 ## Clean Rebuild
 Occasionally builds will fail, especially after adding / deleting files. Deleting the build folder and clearing ccache should fix it.
 
@@ -60,3 +55,17 @@ If this returns `???`, the fault may have occurred in a library call, eg. `memse
 ```
 - You will need to determine the location of the correct objdump depending on where you installed your `aarch64-none-elf` toolchain.
 - Piping to `less` allows you to search with `/`, then input the PC value, and determine what function the fault occurred in.
+
+# Common development pitfalls
+## Server error when contacting the ADS component
+If an "invalid request" error is returned while attempting to attach or remove a VMR from an ADS, double-check that the *VMR RDE* for the ADS endpoint is being used to send the request. See the [ADS capability quirks](target_design_ads_capability) section for more details.
+
+## Insufficient untyped memory after resources are freed
+The VKA allocator may throw a bunch of errors about "insufficient memory to allocate untypeds" despite it being extremely unlikely for the system to have run out of memory (e.g. after something has just been freed). This is caused by freeing an object *before* all descendant capabilities to the object have been deleted. Freeing an object causes the underlying untyped memory to be returned to the VKA allocator's free memory pool. If a capability to the memory *when it was typed* still exists, attempts to retype the untyped memory will fail, causing the VKA allocator to think it is out of memory, and returning the misleading "insufficient memory" error. 
+
+This may not *always* be the cause of this error, but a good way to tell is by using the `seL4_DebugCapIsLastCopy` syscall. This will return true if there exists a copy of a given capability from the current CSpace in *any existing CSpace*.
+
+Potential solutions include:
+1. Revoking the capability before freeing - this is a quick and easy (from the developer's perspective, not in terms of the kernel's efforts) to deal with the error, but leaves references to the revoked caps invalid.
+2. For CellulOS tracked resources, toggling the `GPI_DEBUG` log topic, and ensuring that reference counts for the problem capability increase/decrease according to expectation.
+3. Checking both CNodes and TCBs as potential capability containers. TCBs are often forgotten about as containers that capabilities may need to be freed from.
