@@ -16,29 +16,14 @@ All of the details below are AARCH64 specific. CellulOS currently does not suppo
 | Thread-like PDs  | Shared ELF code and data section (could be in different ADSes) | TLS needs to be written with IPC buffer and OSmosis per-PD data addresses.                                               | On the stack                        |
 | Guest-OS PDs     | Raw binary is used, no loading performed | Dependent on the guest--for Linux, address of DTB must be passed in a register, and ARM SPSR register needs to be set                          | No user-given arguments             |
 
-## Plan for abstracting the entry point for all PDs:
-We will differentiate between three cases, 1) PDs with different code sections, 2) PDs with the same code sections 3) PDs whose binaries are never loaded (VMs). I currently don't think we need any more cases.
-
-1) Write all arguments onto the stack, for non-guest PDs
-2) Every non-guest PD's entry-point will be set to `_start`, and `x0` will hold an argument:
-	1) For PDs with the same code sections, `x0` = the function address
-	3) For PDs with different code sections, `x0 = 1` to indicate that the C runtime must be set up
-3) Nothing will change for guest PDs. They will use their own entry point, and `x0` must be the address of the DTB (for Linux guests)
-4) Modify `_start` to pass both the value in `x0` and the stack pointer to `__sel4_start_c`
-5) modify `__sel4_start_c`:
-	1) for PDs with separate code segments, we let it run `__sel4runtime_start_main` as usual
-	2) for PDs with the same code segments, we cast the function address in `x0` to a function pointer, and call it with the arguments written on the stack
-		1) `__sel4runtime_start_main` eventually calls `sel4runtime_exit` with a callback that does C runtime cleanup and OSmosis PD cleanup, which stops the TCB. 
-		2) We'd want to keep all the musllibc contents intact when thread-like PDs exit, so the only thing that needs to be done is probably to call the OSmosis PD cleanup.
-
 ## `main` or entry function visible to the started PD
-For process-like PDs, this is the standard `main(int argc, char **argv)` function. For thread-like PDs, this can be any function that takes the two, `int argc` and `char **argv` arguments.
+For process-like PDs, this is the standard `main(int argc, char **argv)` function. For thread-like PDs, this can be any function that takes the two, `int argc` and `char **argv` arguments. It may seems strange for secondary threads to receive arguments in the same way that the main thread does, however, recall that all arguments to CellulOS PDs [are passed as strings on the stack](target_pd_runtime_setup_passing_arguments) and that all threads are considered individual PDs.
 
 ## C runtime library
 [sel4runtime](https://github.com/seL4/sel4runtime) provides most of the functions mentioned below. Explanations of modifications to these functions will be annotated with `[mod]`.
 
-## CellulOS PD exit
-When a CellulOS PD exits, it is expected that the PD requests the Root Task's PD component to terminate it perform any {doc}`cleanup policies </design/design_cleanup_policies>`.
+## CellulOS PD Exit Point
+When a CellulOS PD exits, it is expected that the PD requests the Root Task's PD component to terminate it and perform any {doc}`cleanup policies </design/design_cleanup_policies>`. `sel4runtime` already provides an easy way to set a unified exit point, via the [sel4runtime_exit()](https://github.com/seL4/sel4runtime/blob/master/src/env.c#L206) function that is automatically called for any thread executed from the `sel4runtime` entry functions. CellulOS simply sets this exit point to the PD component's `pd_client_exit()` and ensures that every PD is executed through an entry function that eventually calls a proper exit. `sel4runtime_exit` also performs some additional destruction of libc data, as it is intended for exiting a process's main thread. `[mod]` CellulOS includes an exit function meant for secondary thread-PDs, which skips the libc destruction: [sel4runtime_exit_no_destruct](https://github.com/sid-agrawal/sel4runtime/blob/cellulos/src/env.c#L217).
 
 ## libc `_start`
 The `_start` entry-point provided by `sel4runtime` passes a pointer to the top of the stack to the `__sel4_start_c` function in register `x0`. 
@@ -48,12 +33,19 @@ The `_start` entry-point provided by `sel4runtime` passes a pointer to the top o
 `x1` will contain an enum value indicating the PD started was one set up by `sel4utils`, in which case, control is passed to the unmodified `sel4runtime` libc initialization functions.
 
 ### CellulOS process-like PDs
-`x1` will contain an enum value indicating the PD started is a CellulOS PD. `[mod]` Control is passed to a custom CellulOS `sel4runtime` initialization function, which currently only calls the unmodified libc initialization functions and additionally sets the libc exit function to the [](#cellulos-pd-exit).
+`x1` will contain an enum value indicating the PD started is a CellulOS PD. `[mod]` Control is passed to a custom CellulOS `sel4runtime` initialization function, [__sel4runtime_start_main_osm](https://github.com/sid-agrawal/sel4runtime/blob/ab4680f8ea94fd87c5f8028271af7ff43f4eb810/src/start.c#L25), which currently only calls the unmodified libc initialization functions and, eventually, the [](#cellulos-pd-exit-point).
 
 ### CellulOS thread-like PDs
-`x1` contains the function address for the thread-like PD to start execting. `[mod]` Control is passed to a custom entry function which sets the libc exit function similarly to the procedure for process-like PDs. The stack arguments and argument count are extracted and the user-provided function is simply called.
+```{attention}
+TODO Linh: update github link for __sel4runtime_start_entry_osm
+```
+`x1` contains the function address for the thread-like PD to start execting. In this pathway, it's expected that libc has already been initialized for whatever ADS the PD is executing in. `[mod]` Control is passed to a custom entry function, `__sel4runtime_start_entry_osm`, which simply calls the user-provided function with arguments extracted from the stack and, eventually, the [](#cellulos-pd-exit-point). 
 
+## Guest-OS PD Entry
+Guest-OS PDs are not routed through the entry and exit points described above. Their entry is simply the start address of the raw binary kernel image. 
 
+### Linux Guests
+The `x0` register is expected to hold the address to the beginning of the DTB image. Additionally, [SPSR_EL1.M[3:0]](https://developer.arm.com/documentation/ddi0595/2020-12/AArch64-Registers/SPSR-EL1--Saved-Program-Status-Register--EL1-?lang=en) needs to be set to `EL1h`.
 
-## extensible policies
-supply a function which may be called prior to a process's `main` or a thread's function that executes some type of policy?
+## Custom startup and shutdown policies
+Although not currently implemented, it is possible to use these unified entry and exit points to supply additional user-given functions that perform additional policy enforcements once executing within a new PD. For instance, a startup policy that prevents the new PD from ever allocating physical memory in some address range.

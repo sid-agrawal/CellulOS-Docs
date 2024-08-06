@@ -8,6 +8,7 @@ There are currently three different setup methods which the `pd_creation` module
     - the TLS and user-given arguments will be written on the stack
 3. If the CPU has been elevated, it's assumed that the PD is a guest OS and nothing is set up. 
 
+(target_pd_runtime_setup_passing_arguments)=
 ## Passing Arguments to the PD
 All arguments are passed to PDs as strings and are written on the stack, except for guest-OS PDs. The `pd_creation` module takes word arguments and converts them into strings. This is primarily because all our PDs are currently spawned programatically, and word arguments are more practical. 
 
@@ -43,7 +44,7 @@ This is not really a big limitation, it would be trivial to move where this data
 The existence of a binded seL4 VCPU object with a CellulOS CPU object determines whether the CPU is meant for a guest-OS PD.
 
 ## TLS setup
-Why is ELF loading done by the Root Task by the TLS setup done by a client PD? TLS setup is done for thread-like PDs, who share ADSes with another PD. Its TLS needs to have the same image, which is dependent on a static portion of the ELF, and setting up a thread-PD from within the Root Task causes the PD to fault, as the TLS images do not match.
+Why is ELF loading done by the Root Task but the TLS setup done by a client PD? TLS setup is done for thread-like PDs, who share ADSes with another PD. Its TLS needs to have the same image, which is dependent on a static portion of the ELF, and setting up a thread-PD from within the Root Task causes the PD to fault, as the TLS images do not match.
 
 ```{note}
 There is a chance that it is faulting due to another reason, and TLS setup from within the Root Task may be possible. We have not explored this deeper.

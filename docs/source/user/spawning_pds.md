@@ -1,4 +1,3 @@
-(target_spawning_pds)=
 # Spawning Common PDs
 ## What exactly are PDs?
 The term "PD" is often used throughout the documention to refer to an entity in the system that can execute code. However, an "execution unit" in CellulOS is comprised of a PD, ADS and CPU, and are referred to as `runnable`s in CellulOS source code. Creating runnables requires configuration of all three of these components. A runnable can be a thread, process, virtual machine, etc.

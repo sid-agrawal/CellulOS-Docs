@@ -12,7 +12,6 @@ How the VMR is given to the created PD depends on whether it is `SHARED` or `DIS
 | Stack | DISJOINT | Identical to how DISJOINT VMRs are allocated, except with an additional guard page that is NOT backed by a physical page. |
 | Code | DISJOINT | An ELF image must be specified along with this VMR, and ELF loading will be perfomed. |
 
-(target_spawning_pds_shared_vmrs)=
 ### `SHARED` VMRs
 For convenience, a VMR which the creator PD wishes to share with the created PD can be described in the config options by only specifying a VMR type. The ADS config system will request the ADS server to search for a VMR of that type in the creator's ADS. This convenience option only works for VMRs which have a special type (e.g. the stack, heap, ELF data, etc.), where only one such VMR exists in an ADS. Otherwise, the user must specify all other info describing the VMR to the ADS config system.
 
@@ -35,7 +34,7 @@ Not all fields of the VMR description ([vmr_config_t](https://github.com/sid-agr
 | page_bits    | ignored    | optional     | 4K pages                                |
 | mo           | ignored    | optional     | new MO will be allocated                |
 
-`^1`: This field is only optional if the VMR type is a special type, as described in [`SHARED` VMRs](target_spawning_pds_shared_vmrs).
+`^1`: This field is only optional if the VMR type is a special type, as described in [](#shared-vmrs).
 
 ## CPU Configuration
 A CPU may need higher priviledges to access a few system registers. In seL4, this corresponds to binding a VCPU object to a TCB, and is done when the `elevated_cpu` config option is toggled.
@@ -76,7 +75,7 @@ The VMRs that must be specified for a HighJMP ADS are:
 - Shared IPC Buffer
 - Share ELF code segment
 
-Since the stack, IPC buffer, and ELF code segments are all special VMR types, the VMR description can use the convenience option described in [`SHARED` VMRs](target_spawning_pds_shared_vmrs).
+Since the stack, IPC buffer, and ELF code segments are all special VMR types, the VMR description can use the convenience option described in [](#shared-vmrs).
 
 The CPU can then be configured to swap between ADSes on demand using `cpu_client_change_vspace()`.
 
