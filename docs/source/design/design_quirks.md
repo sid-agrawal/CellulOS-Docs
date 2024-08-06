@@ -20,14 +20,14 @@ Returning root task IDs of resources may seem like poor design, and while we do 
 ```
 
 PDs who have their ADS set up for them by another PD can access their VMR RDE by the `sel4gpi_get_bound_vmr_rde()` utility function. Similarly, any PD can access the *ADS resource* of the ADS currently binded to its CPU by the `sel4gpi_get_ads_conn()` utility function.
-The ADS RDE endpoint is only accessible to PDs who have 
+The ADS RDE endpoint is only accessible to PDs who have been explicitly given this RDE from another priviledged PD.
 
 ```{warning}
 For HighJMP PDs, The `sel4gpi_get_bound_vmr_rde()` and `sel4gpi_get_ads_conn()` utility functions only return endpoints to the *originally bounded* ADS. Currently, the PD must maintain a reference to its alternate ADS for resource operations. 
 A very implementation-specific explanation is provided below.
 ```
 
-For HighJMP PDs, changing ADSes is an operation done on the CPU resource. In order to update the binded ADS resource and VMR endpoint references within the PD's shared OSmosis data frame, the root task would need to get the PD's CSlot for those endpoints, which isn't always tracked. An ADS endpoint is given to the CPU component during the `cpu_change_vspace` API call, but this is unwrapped into its badge values, and still cannot be used to update the PD's shared OSmosis data.
+For HighJMP PDs, changing ADSes is an operation done on the CPU resource. In order to update the binded ADS resource and VMR endpoint references within the PD's [shared OSmosis data frame](target_glossary_shared_data), the root task would need to get the PD's CSlot for those endpoints, which isn't always tracked. An ADS endpoint is given to the CPU component during the `cpu_change_vspace` API call, but this is unwrapped into its badge values, and still cannot be used to update the PD's shared OSmosis data.
 
 ## App PD Heaps
 The Root Task and test PDs all use static-sized and statically allocated heaps, embedded in ELF data. Apps and non-root-task server PDs all have static-sized and *dynamically* allocated heaps, all of which start at the address defined by the `PD_HEAP_LOC` macro. The chosen address is an arbitrary one that is known to be free after a PD's ADS has been set up. The motive for this is convenience in isolating the heap for the HighJMP PD's ADSes.

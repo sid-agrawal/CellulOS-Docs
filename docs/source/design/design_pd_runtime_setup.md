@@ -1,9 +1,4 @@
 # PD Runtime Setup
-
-```{attention}
-WIP
-```
-(target_pd_runtime_setup_conditions)=
 ## Conditions for setup method
 There are currently three different setup methods which the `pd_creation` module employs based on what the ADS and CPU configurations imply. 
 
@@ -31,7 +26,7 @@ However, there is a limitation of our resource-server to client communication pr
 Due to this, some runtime-specific data which are too large to send through our current communication protocol is stored in the Root Task, which result in the Root Task making a few small runtime-setup decisions.
 
 ### `pd_client_runtime_setup()`
-This is the only API call where the Root Task will make decisions on how a PD should be set up. Since the Root Task does not store nor is provided any of the user-configuration data, it makes simple inferences on how to set up the PD, based on the minimal runtime-specific data stored in various components. The inferences follow those listed in [Conditions for setup method](target_pd_runtime_setup_conditions).
+This is the only API call where the Root Task will make decisions on how a PD should be set up. Since the Root Task does not store nor is provided any of the user-configuration data, it makes simple inferences on how to set up the PD, based on the minimal runtime-specific data stored in various components. The inferences follow those listed in [](#conditions-for-setup-method).
 
 ### ELF metadata
 The Root Task performs ELF loading, for convenience, through the `ads_client_load_elf()` API call. The PD component will store a bit of ELF metadata within a PD object's metadata. 
