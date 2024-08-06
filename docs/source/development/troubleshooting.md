@@ -69,3 +69,9 @@ Potential solutions include:
 1. Revoking the capability before freeing - this is a quick and easy (from the developer's perspective, not in terms of the kernel's efforts) to deal with the error, but leaves references to the revoked caps invalid.
 2. For CellulOS tracked resources, toggling the `GPI_DEBUG` log topic, and ensuring that reference counts for the problem capability increase/decrease according to expectation.
 3. Checking both CNodes and TCBs as potential capability containers. TCBs are often forgotten about as containers that capabilities may need to be freed from.
+
+## Unexpected Null Cap Invocation
+### Thread PDs
+### CNode guard is 0
+
+## No RDE found

@@ -29,7 +29,7 @@ intersphinx_disabled_domains = ['std']
 templates_path = ['_templates']
 
 # for implicit references
-myst_heading_anchors = 2
+myst_heading_anchors = 3
 
 # -- Options for HTML output
 

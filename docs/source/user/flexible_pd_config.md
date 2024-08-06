@@ -54,6 +54,7 @@ This bulk sharing of resources by type currently only allows sharing of MO resou
 ## Fault Handling
 The creator PD can specify a fault handler for the created PD by setting the fault endpoint in the configuration. If none are specified, a new fault endpoint will be allocated for the PD, which the creator can retrieve to listen on.
 
+(target_pd_config_linked_pds)=
 ## Linked PDs
 You may want some PDs to be automatically terminated when another PD exits (for instance, additional threads when the main thread of a process exits). To create a PD which gets terminated when the creator PD exits, the `link_with_current` config option can be toggled. For thread-PDs, this option is automatically set if using `sel4gpi_configure_thread()`.
 

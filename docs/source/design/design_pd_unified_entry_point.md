@@ -1,8 +1,4 @@
 # Unified PD Entry and Exit Point
-```{attention}
-WIP
-```
-
 The goal of a unified entry and exit point is for all PDs in the system to follow a few common standard procedures for startup and exit. We have identified three main PD startup paths that currently cannot be combined any further (it either may not be possible or more work is required to combine them).
 
 ```{note}
