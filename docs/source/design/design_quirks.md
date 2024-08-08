@@ -39,7 +39,7 @@ The root task's ADS component handles both address spaces and virtual memory reg
 
 There are four types of endpoints related to address spaces and virtual memory:
 1. **ADS RDE**: Allows the creation of new address spaces. A PD will only have this if it was explicitly shared from another, privileged PD.
-2. **ADS Capability**: Allows performing operations on a specific address space. Sny PD can access the ADS resource of the ADS currently bound to its CPU using the `sel4gpi_get_ads_conn()` utility function.
+2. **ADS Capability**: Allows performing operations on a specific address space. Any PD can access the ADS resource of the ADS currently bound to its CPU using the `sel4gpi_get_ads_conn()` utility function.
 3. **VMR RDE**: Allows the allocation of virtual memory regions within a specific address space. PDs who have their ADS set up for them by another PD can access their VMR RDE by the `sel4gpi_get_bound_vmr_rde()` utility function.
 4. **VMR Capability**: Allows mapping or deleting a particular virtual memory region.
 
