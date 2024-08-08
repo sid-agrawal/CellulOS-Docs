@@ -75,6 +75,7 @@ The VMRs that must be specified for a HighJMP ADS are:
 - Shared Stack
 - Shared IPC Buffer
 - Share ELF code segment
+- Share OSM Data segment (1 page)
 
 Since the stack, IPC buffer, and ELF code segments are all special VMR types, the VMR description can use the convenience option described in [](#shared-vmrs).
 
