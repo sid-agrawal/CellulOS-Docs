@@ -25,3 +25,12 @@ PDs can access their own resource directory using the functions in `pd_utils`:
     - A PD would use this if it has RDEs for multiple spaces of the same resource type. For example, if it has access to two file namespaces. 
     - A resource server is responsible for returning the space ID to the PD when the PD requests a new resource space.
     - Alternatively, if a PD is sharing RDEs with other PDs, then the sender is responsible to provide arguments or send a message to indicate the space IDs if necessary.
+
+## Tracking Held Resources
+
+(target_hold_registry)=
+### Hold Registry
+
+```{attention}
+To be filled out
+```

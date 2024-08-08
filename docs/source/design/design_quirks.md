@@ -2,6 +2,14 @@
 
 This captures some quirks of the design that my be unintuitive.
 
+## Root TasK PD
+
+In the model, the root task is a PD like any other, although it has access to all resources in the system. In practice, the root task itself provides most of the mechanisms used to track model state, so it cannot be treated as a "normal PD" in implementation. It is bootstrapped by the kernel, and starts up with an untracked address space, execution context, mapped memory, and other resources.
+
+When the GPI server initializes, it "forges" a tracked PD for the root task. This PD resource is not intended to be used with most functions in the PD API, except it does have a [hold registry](target_hold_registry) which can track the root task's held resources through `pd_add_resource` and `pd_remove_resource`.
+
+The GPI server also forges the root task's address space. By the time the GPI server initializes, the address space is already populated with some virtual memory regions. The server walks the reservations and forges VMR / MO resources for the existing layout. Then, the root task's forged ADS can be used normally in the ADS component to attach / remove MOs. This is useful if a client sends an MO capability to the root task, then the root task may easily attach it to its own address space.
+
 (target_design_ads_capability)=
 ## ADS Capability
 The ADS capability, like the PD capability, is not an entity in the model. The ADS capability is a resource in implementation only, providing a PD with the ability to perform certain operations on an entire address space.
