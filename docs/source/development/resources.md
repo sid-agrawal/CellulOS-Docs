@@ -31,6 +31,25 @@ PDs can access their own resource directory using the functions in `pd_utils`:
 (target_hold_registry)=
 ### Hold Registry
 
-```{attention}
-To be filled out
+The root task maintains the metadata that tracks which resources each PD holds. This is stored in the *hold registry*, a property of the *pd_t* structure, and uses the [registry util](target_registry_library). The key of the hash table is the 64 bit "compact resource ID" that uniquely identifies a resource in the system; in other words, the key is a badge value created with `gpi_new_badge(type, 0, 0, space_id, object_id)`. The hold registry is updated every time a PD has a resource added or removed.
+
+It is possible for a PD to have more than one copy of a resource. For example, a PD might open the same file to two different file descriptors, or two other PDs might send it the same MO. When this happens, the root task reuses the same resource capability in the PD's cspace for all references to the resource. To track this, entries of the hold registry maintain their own reference count, tracking the number of copies of this resource that *this PD* holds. Entries of the hold registry will correspond to entries of the corresponding component or server's resource registry, as shown in the diagram below. The resource's component will track the *global* reference count.
+
+```{image} ../images/resource_registries.png
+    :width: 700px
 ```
+
+### Removing Resources
+When a PD removes a resource (by closing a file descriptor, for instance), the reference count of the node in the hold registry is reduced. If the reference count of the hold node reaches zero, then hold node is deleted, and the root task revokes the resource capability from the PD. The PD will no longer be able to invoke it, and the slot that contained the capability will remain empty (see [revoked slots](target_limitations_revoke_slots) for more details).
+
+For core resources, the root task decrements the reference count of the resource in the corresponding *component registry* whenever a hold node in a PD's *hold registry* is deleted. Deleting a hold node does not directly delete a resource, but if the reference count of the entry in the component registry entry reaches zero, then the resource will be deleted. 
+
+For non-core resources, we expect resource servers to handle the deletion of their own resources. Resource servers should include "free" and/or "delete" functions in their APIs, and notify the root task of these operations:
+- `resspc_client_delete_resource`: Delete a resource from a resource space and all PDs that hold it. For example, the file server would use this when a file is unlinked and deleted from the file system.
+- `resspc_client_revoke_resource`: Remove a particular client PD's reference to a resource. This reduces the refcount of the corresponding hold node in the PD's hold registry. For example, the file server would use this when a PD closes a file.
+
+```{attention}
+The name of the function `resspc_client_revoke_resource` may be confusing and should be renamed to better reflect its meaning.
+```
+
+

@@ -20,6 +20,7 @@ We have tried to eliminate garbage accumulation for long term use of the system,
 On aarch64, an [ASID pool](target_glossary_asid_pool) contains enough space for up to 512 VSpaces. If we run out of space in the default ASID Pool due to a large number of address spaces in the system, we can create up to 128 (for aarch64) ASID pools, each of them taking a 4K page of memory. If the address spaces are being destroyed as well, some of these pools may become unused. We would need to introduce some reference tracking to identify when an ASID Pool can be destroyed. Note that this source of garbage will not actually occur in the system currently, since the [badge scalability](target_limitations_badge_scalability) issue will already prevent us from creating more than 0xFE = 254 address spaces.
     - As a side note, we learned that destroying a VSpace does free its assigned ASID. However, destroying all the VSpaces assigned to an ASID pool will not automatically destroy the pool.
 
+(target_limitations_revoke_slots)=
 ### Revoked Slots
 When we revoke a resource from a PD, we do not free the slot in its CSpace. This is so that the slot will not get filled with some other resource, potentially causing the PD to use the new resource unknowingly while it tries to use the old resource. If the system has a lot of revoked resources, these empty revoked slots could eventually fill up a CSpace. The alternative would be to have a handler in each PD to be notified when resources are revoked.
 

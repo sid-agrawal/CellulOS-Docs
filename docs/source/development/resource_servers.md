@@ -6,4 +6,5 @@ Resource servers are PDs which provide one or more types of resources to other c
 resource_server_requirements
 resource_server_creation
 resource_server_communications
+registry_library
 ```
