@@ -4,6 +4,15 @@
 WIP
 ```
 
+## Status of different VMM Implementations
+
+
+|  guestOS  |  microkit  | non-OSM (sel4utils)  |     OSM     |     QEMU     |
+| --------- | ---------- | -------------------- | ----------  | -----------  | 
+|   Linux   |    Yes (Odroid and Qemu)     |        WIP (Odroid and Qemu)           |     WIP (Odroid and Qemu)     |  Assumed Yes |
+|  baby-VM  |     NA     |        WIP  (Odroid and Qemu)          |     WIP (Odroid and Qemu)     |     Yes      |
+
+
 There are two VMM implementations in *CellulOS*, both ported from seL4's Microkit [libvmm](https://github.com/au-ts/libvmm). 
 One implementation only seL4 utility libraries present in the [sel4test](https://github.com/seL4/sel4test) project, and the other uses only CellulOS APIs.
 
