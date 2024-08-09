@@ -1,6 +1,19 @@
 (target_resource_server_communication)=
 # Communications
 
+(target_resource_server_rpc)=
+## Resource Server RPC
+Resource servers need to define an RPC protocol and provide a `clientapi` file for client PDs to be able to send them requests.
+
+### NanoPB
+RPC protocols for the root task's components are defined in `.proto` files, which are used to generate message structures with NanoPB. `gpi_rpc.c` implements some utility functions for sending / receiving NanoPB RPC messages through seL4 IPC. Resource Servers can choose a different implementation for their own RPC, but the [util libs](target_resource_util_lib) are intended for NanoPB.
+
+### Magic Numbers
+The system's current RPC protocols all include a "magic" field in each request message. The `clientapi.c` files set the field to a unique value specified for the protocol, eg. `CPU_RPC_MAGIC`. Upon receiving a message, servers or components will check that the message's magic value aligns with the server's value, and return an error otherwise. This is not for security reasons, but to help prevent accidental use of resources. For example, if a PD has an MO and an ADS resource, and it accidentally invokes the ADS while it means to invoke the MO, then whatever arguments it wrote for the MO could end up being decoded as an entirely different operation for the ADS. The magic number will help prevent this scenario, but it will not help if a PD accidentally invokes a different resource of the same type.
+
+### NanoPB Slowdown
+It is worth noting that, from our benchmarks so far, we see NanoPB causing various types of RPCs to slow down by a factor of ~3x. While the library saves development time, it reduces the system's efficiency significantly, since most time is spent in IPC. While NanoPB message structures are compiled statically, at runtime NanoPB iterates over the structures that describe message fields in order to encode / decode messages. NanoPB was optimized for code size, not for efficiency, and there may be another library that would be more ideal for us.
+
 ## Serving Client Requests
 The resource server listens on the endpoint that it provided to the root task when it [created its resource space](target_resource_server_creating_space). Any PD with an RDE for that space will have a badged version of the same endpoint, and thus can send requests to the resource server. The resource server will know that the request came from an RDE because the badge will include a placeholder `BADGE_OBJ_ID_NULL` value for the object ID. Usually, a request from an RDE is to create and/or allocate a resource.
 
