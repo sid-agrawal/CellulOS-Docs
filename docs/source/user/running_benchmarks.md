@@ -13,6 +13,9 @@ The benchmarking script located at `/scripts/bench` builds and runs a series of 
     `setuptools sel4-deps protobuf grpcio-tools`.
 4. Set configuration options in `run_benchmarks.py` (currently just hardcoded in the script).
     - Set the `build_folder` to the Odroid build folder in the OSmosis repo.
+    - Set the `n_iters` to the number of iterations for each benchmark. 
+        - For tests where the board is rebooted between every iteration, the number of reboots will be `n_iters`. 
+        - If you want to run the "no-reboot" tests with the same number of iterations, you will have to ensure that the macro `DEFINE_TEST_WITH_TYPE_MULTIPLE` in the OSmosis repo defines the correct number of iterations. By default it defines 500 iterations, and you may reduce the number by commenting out some of the `DEFINE_TEST_WITH_TYPE` lines in the macro.
 
 ### Test Configuration
 - Tests first need to be configured in `sel4test` using `sel4bench` to output timing results:
@@ -97,5 +100,6 @@ This makes the assumption that your environment is set up as described in [booti
 2. From within the virtualenv: `sudo -E env PATH=$PATH python run_benchmarks.py`.
     - `sudo` is needed for the script to access `/dev/ttyUSB0` & `/dev/ttyUSB0`, and copy build images to `/srv/tftp`.
     - Alternatively, to run a process in the background that will not be killed when the ssh session closes: `bash ./run`. You can check on its progress using `cat nohup.out`.
+    - To find your benchmark processes running in the background: `ps -ef | grep run_benchmarks.py`.
 3. Results are saved to `benchmarks.csv`. 
     - The file is updated after every test type has finished all iterations, or if there is an error that causes the script to abort.
