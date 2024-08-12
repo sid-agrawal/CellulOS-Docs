@@ -10,7 +10,7 @@ There are currently three different setup methods which the `pd_creation` module
 
 (target_pd_runtime_setup_passing_arguments)=
 ## Passing Arguments to the PD
-All arguments are passed to PDs as strings and are written on the stack, except for guest-OS PDs. The `pd_creation` module takes word arguments and converts them into strings. This is primarily because all our PDs are currently spawned programatically, and word arguments are more practical. 
+All arguments are passed to PDs as strings and are written on the stack, except for guest-OS PDs. The `pd_creation` module takes word arguments and converts them into strings. This is primarily because all our PDs are currently spawned programmatically, and word arguments are more practical. 
 
 ### Stack Layout for C runtime setup
 ```{image} ../figures/stack_layout_full.jpg
@@ -21,9 +21,9 @@ All arguments are passed to PDs as strings and are written on the stack, except 
 ```
 
 ## The Root Task's Role in PD configuration
-All configuration is currently done within the client via the `pd_creation` module, by combining various, smaller API clls to the Root Task. 
+All configuration is currently done within the client via the `pd_creation` module, by combining various, smaller API calls to the Root Task. 
 The goal was to keep the Root Task as simple as possible, and to not store any runtime specific data, nor to make any decisions on how a PD should be set up. 
-However, there is a limitation of our resource-server to client communication protocol, where we do not send large messages that may require setting up an additional shared message buffer beyond the seL4 IPC buffer or bypass the nanopb interface. 
+However, there is a limitation of our resource-server to client communication protocol, where we do not send large messages that may require setting up an additional shared message buffer beyond the seL4 IPC buffer or bypass the NanoPB interface. 
 Due to this, some runtime-specific data which are too large to send through our current communication protocol is stored in the Root Task, which result in the Root Task making a few small runtime-setup decisions.
 
 ### `pd_client_runtime_setup()`
@@ -41,7 +41,7 @@ This is not really a big limitation, it would be trivial to move where this data
 ```
 
 ### Elevated CPUs
-The existence of a binded seL4 VCPU object with a CellulOS CPU object determines whether the CPU is meant for a guest-OS PD.
+The existence of a bound seL4 VCPU object with a CellulOS CPU object determines whether the CPU is meant for a guest-OS PD.
 
 ## TLS setup
 Why is ELF loading done by the Root Task but the TLS setup done by a client PD? TLS setup is done for thread-like PDs, who share ADSes with another PD. Its TLS needs to have the same image, which is dependent on a static portion of the ELF, and setting up a thread-PD from within the Root Task causes the PD to fault, as the TLS images do not match.

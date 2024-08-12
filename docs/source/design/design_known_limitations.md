@@ -8,7 +8,7 @@ This page details undesired behaviours or missing pieces of the current system, 
 ```{image} ../images/badge_bits.png
   :width: 300
 ```
-We use the 64-bit badge value of endpoint capabilities to track their purpose - either as RDEs or as resources. For convenience and efficiency, all relevant information is stored / retrieved by masking the badge itself. However, this introduces a scalability problem, especially since we cannot have more than 255 resource types or resource spaces. Eventually, we should replace the badge value with some unique ID that can be used to find a corresponding data structure. For example, the badge value could be the ID for a hash table maintained by the corresponding resource server (or root task), and the value is a stucture containing the cap type, permissions, space ID, client ID, and object ID with large-enough fields for scalability.
+We use the 64-bit badge value of endpoint capabilities to track their purpose - either as RDEs or as resources. For convenience and efficiency, all relevant information is stored / retrieved by masking the badge itself. However, this introduces a scalability problem, especially since we cannot have more than 255 resource types or resource spaces. Eventually, we should replace the badge value with some unique ID that can be used to find a corresponding data structure. For example, the badge value could be the ID for a hash table maintained by the corresponding resource server (or root task), and the value is a structure containing the cap type, permissions, space ID, client ID, and object ID with large-enough fields for scalability.
 
 ### Resource Directory Scalability
 The resource directory is maintained as a simple, static array in the PD's [shared data page](target_glossary_shared_data). It has a static maximum of 8 non-core resource types, and 8 spaces per resource type, for a particular PD's resource directory. A dynamic data structure would be more difficult since the shared data page is used by two PDs, so pointers would need to be adjusted across address spaces.
@@ -39,7 +39,7 @@ When a PD requests a model extraction, the root task iterates over all PDs in th
 
 (target_limitations_runtime_metrics)=
 ### Runtime Metrics
-The system does not currently support calculating the model metrics (RSI & FR) at runtime. It would be possible to do so if we modify the model extraction utility to store the graph in a traversible data structure and implement the calculation algorithms.
+The system does not currently support calculating the model metrics (RSI & FR) at runtime. It would be possible to do so if we modify the model extraction utility to store the graph in a traversable data structure and implement the calculation algorithms.
 
 ## Resource / PD Cleanup
 
@@ -62,7 +62,7 @@ Core resources include those managed by the root task (MO, ADS, CPU, EP). Sendin
 
 However, sending resources managed by non-root-task servers, through the PD component are not tracked, since the root task (a) knows nothing about these resources and (b) cannot unwrap a resource endpoint that another server-PD is listening on. 
 
-Theoretically, it is possible to send non-core resources between non-server PDs, however, due to lack of refcounting, this can cause many issues when the resources are freed.
+Theoretically, it is possible to send non-core resources between non-server PDs, however, due to lack of reference counting, this can cause many issues when the resources are freed.
 
 Supporting this type of resource transfer (with tracking) is not a difficult engineering task, however, the design of how the resource servers may be coordinated with the root task in tracking a non-core resource transfer needs to be considered more deeply.
 
@@ -73,7 +73,7 @@ This is not an issue for transfer of non-core resources from a server-PD to a ot
 ## Sample Apps
 
 ### File System
-We have made some simplying assumptions for the file system:
+We have made some simplifying assumptions for the file system:
 - The file system assumes that only one thread accesses it (which will remain true as long as the file server is the only PD that may access it). This means that any logic related to file locking or mutual exclusion has been removed.
 - The file system's logging mechanism is disabled, due to the assumption that the file system is unrecoverable if the system crashes (since it is stored in memory).
 - The file server's API does not allow for any operations related to file ownership or permissions, as we expect this functionality to be handled by capability permissions in the future.

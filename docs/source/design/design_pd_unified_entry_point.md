@@ -8,7 +8,7 @@ All of the details below are AARCH64 specific. CellulOS currently does not suppo
 ## Three main setup pathways:
 | PD type          | Defining feature                                | Setup Required                                                                                                                          | How user-given arguments are passed |
 | ---------------- | ----------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------- |
-| Process-like PDs | Different ELF code and data section             | Prior to executing the PD, AUX vectors, some ELF data must be written on the stack. Once in the PD, Musllibc runtime initialization 	   | On the stack                        |
+| Process-like PDs | Different ELF code and data section             | Prior to executing the PD, AUX vectors, some ELF data must be written on the stack. Once in the PD, musl libc runtime initialization 	   | On the stack                        |
 | Thread-like PDs  | Shared ELF code and data section (could be in different ADSes) | TLS needs to be written with IPC buffer and OSmosis per-PD data addresses.                                               | On the stack                        |
 | Guest-OS PDs     | Raw binary is used, no loading performed | Dependent on the guest--for Linux, address of DTB must be passed in a register, and ARM SPSR register needs to be set                          | No user-given arguments             |
 
@@ -35,7 +35,7 @@ The `_start` entry-point provided by `sel4runtime` passes a pointer to the top o
 ```{attention}
 TODO Linh: update github link for __sel4runtime_start_entry_osm
 ```
-`x1` contains the function address for the thread-like PD to start execting. In this pathway, it's expected that libc has already been initialized for whatever ADS the PD is executing in. `[mod]` Control is passed to a custom entry function, `__sel4runtime_start_entry_osm`, which simply calls the user-provided function with arguments extracted from the stack and, eventually, the [](#cellulos-pd-exit-point). 
+`x1` contains the function address for the thread-like PD to start expecting. In this pathway, it's expected that libc has already been initialized for whatever ADS the PD is executing in. `[mod]` Control is passed to a custom entry function, `__sel4runtime_start_entry_osm`, which simply calls the user-provided function with arguments extracted from the stack and, eventually, the [](#cellulos-pd-exit-point). 
 
 ## Guest-OS PD Entry
 Guest-OS PDs are not routed through the entry and exit points described above. Their entry is simply the start address of the raw binary kernel image. 

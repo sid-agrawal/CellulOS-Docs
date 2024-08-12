@@ -10,7 +10,7 @@ How the VMR is given to the created PD depends on whether it is `SHARED` or `DIS
 | All VMRs  | SHARED | The same physical pages are mapped in both ADSes (normally to the same virtual addresses as well). |
 | Most VMRs | DISJOINT | A new VMR of the specified size will be allocated at the specified virtual address. A pre-existing MO can be provided to be mapped at this VMR. If not provided, a new MO will be allocated.  |
 | Stack | DISJOINT | Identical to how DISJOINT VMRs are allocated, except with an additional guard page that is NOT backed by a physical page. |
-| Code | DISJOINT | An ELF image must be specified along with this VMR, and ELF loading will be perfomed. |
+| Code | DISJOINT | An ELF image must be specified along with this VMR, and ELF loading will be performed. |
 
 ### `SHARED` VMRs
 For convenience, a VMR which the creator PD wishes to share with the created PD can be described in the config options by only specifying a VMR type. The ADS config system will request the ADS server to search for a VMR of that type in the creator's ADS. This convenience option only works for VMRs which have a special type (e.g. the stack, heap, ELF data, etc.), where only one such VMR exists in an ADS. Otherwise, the user must specify all other info describing the VMR to the ADS config system.
@@ -37,7 +37,7 @@ Not all fields of the VMR description ([vmr_config_t](https://github.com/sid-agr
 `^1`: This field is only optional if the VMR type is a special type, as described in [](#shared-vmrs).
 
 ## CPU Configuration
-A CPU may need higher priviledges to access a few system registers. In seL4, this corresponds to binding a VCPU object to a TCB, and is done when the `elevated_cpu` config option is toggled.
+A CPU may need higher privileges to access a few system registers. In seL4, this corresponds to binding a VCPU object to a TCB, and is done when the `elevated_cpu` config option is toggled.
 
 ## RDE Configuration
 The created PD can be given all or a subset of the RDEs which the creator PD can request from. The convenience function [sel4gpi_add_rde_config()](https://github.com/sid-agrawal/sel4-gpi/blob/cellulos/libsel4gpi/include/sel4gpi/pd_creation.h#L275) can be used to specify that an RDE of a certain resource type and namespace should be shared with the created PD.

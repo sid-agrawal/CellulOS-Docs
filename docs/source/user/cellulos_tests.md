@@ -66,7 +66,7 @@ High
 - Cleanup of resource server PDs, resource spaces, client PDs
 - KVStore Server in a separate thread, separate ADS within same PD, separate process
 - FS namespaces
-- Multiple File Sytems
+- Multiple File Systems
 - PD Cleanup policy following a crash
 
 ### Actions

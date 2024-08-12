@@ -70,7 +70,7 @@ The GIC distributor region emulation is done per CPU. The current implementation
 ## (WIP) Old Notes
 ### Specific Memory Regions
 
-These need to be set up in the vCPU’s vspace
+These need to be set up in the vCPU’s VSpace
 
 - Linux image’s DTS expects guest RAM at `0x40000000` (default is 256 MB)
     - Guest’s DTB and RAM Disk addresses are then just placed within this region
@@ -85,7 +85,7 @@ Currently running VMM as a sel4test process, but if we were to run it just as an
 
 - VKA
 - RT’s IRQControl cap (or a minted handler)
-- access to its own vspace and the root page table for its vspace
+- access to its own VSpace and the root page table for its VSpace
 - an ASID Pool (if using a previously created one)
 - a simple object (currently on used to get the RT’s TCB for setting scheduling priority to max - need to look into whether it will still be scheduled to run if priority is set using only the test or other parent process’s TCB)
 
@@ -95,7 +95,7 @@ Currently running VMM as a sel4test process, but if we were to run it just as an
     - If we run out of memory, check the following:
         - virtual pool range of the loading process’s allocation manager
         - the amount of untyped memory available for the loader (is it being given to other things first?)
-        - the loading process’s cspace size - may run out of slots (although if mapping is done with large pages, this shouldn’t really be an issue)
+        - the loading process’s CSpace size - may run out of slots (although if mapping is done with large pages, this shouldn’t really be an issue)
 - binaries are placed in ELF under specific sections and with specific symbol names, see `projects/sel4-gpi/vmm/tools/package_guest_images.S`
     - to build as part of the sel4test-driver, requires passing in path of the guest kernel image (currently built separately), guest DTB image (built from a DTS using `dtc`), and a guest RAM disk image (currently built separately)
     - this is then `memcpy`'d to the expected virtual addresses for the guest, which is kind of wasteful - is there some way we can avoid this (maybe via linker script)?
@@ -105,7 +105,7 @@ Currently running VMM as a sel4test process, but if we were to run it just as an
 - original VMM is linked using LLVM’s LLD instead of GCC’s default `ld`, can be specified in cmake with `add_link_options("-fuse-ld=lld")`
     - currently doesn’t work, as cmake can’t find `lld` in PATH despite it being included
     - also using GCC’s default linker doesn’t seem to have any issues at the moment
-- the rest of the entire project specifies board names with hypens, e.g. `qemu-arm-virt`, but the VMM uses underscores, since certain symbols are defined using the board name (which can’t have hyphens)
+- the rest of the entire project specifies board names with hyphens, e.g. `qemu-arm-virt`, but the VMM uses underscores, since certain symbols are defined using the board name (which can’t have hyphens)
     - currently, we just swap to the correct name in CMakeLists.txt if we’re building the vmm files, but this could (should?) change b/c we should ideally parse the DTS for this
 
  
@@ -131,5 +131,5 @@ Currently running VMM as a sel4test process, but if we were to run it just as an
 
 - define `ZF_LOG_LEVEL` in CMakeLists.txt to get the sel4 util logs showing
 - attempted to enable dynamic morecore. for some reason, it’s being called before the initial static mem for morecore is even initialized
-    - happens somewhere in `sel4utils_bootstrap_vspace_with_bootinfo_leaky`, specifically a call to the vspace function for allocating new pages
+    - happens somewhere in `sel4utils_bootstrap_VSpace_with_bootinfo_leaky`, specifically a call to the VSpace function for allocating new pages
 

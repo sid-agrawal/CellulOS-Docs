@@ -36,9 +36,9 @@ The debug options for the GPI server are located in `projects/sel4-gpi/libsel4gp
     - Other app images are in the `apps/sel4test-driver/` directory
 3. Once GDB starts up, connect to Qemu with `target remote :1234`.
 
-## Loading debug symbols from musllibc
-By default, debug symbols are not loaded from musllibc. If you want to set a breakpoint inside `malloc.c`, for example, you will need to extract the symbols.
-1. Enable musllibc debug: in `/projects/musllibc/makefile` line 57, change `${ENABLE_DEBUG}` to `--enable-debug`. 
+## Loading debug symbols from musl libc
+By default, debug symbols are not loaded from musl libc. If you want to set a breakpoint inside `malloc.c`, for example, you will need to extract the symbols.
+1. Enable musl libc debug: in `/projects/musllibc/makefile` line 57, change `${ENABLE_DEBUG}` to `--enable-debug`. 
     - I have not figured out how to properly set the flag, as build errors occured when I tried to set it from the cmake file.
 2. Extract the desired object file: eg. to extract malloc, run `ar -xv apps/sel4test-driver/musllibc/build-temp/stage/lib/libc.a malloc.o` from the build folder.
 3. Now the symbols should be loaded automatically in GDB.

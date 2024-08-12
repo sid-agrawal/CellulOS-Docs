@@ -37,7 +37,7 @@ When a fault endpoint is allocated and configured in the CPU of a new PD, it exi
 3. The TCB of the PD for which faults will be handled
 
 However, the third reference to the endpoint is not tracked as a reference by the RT. The reason for this is that the `cpu_client_config()` API call requires three unwrapped caps (the maximum that seL4 supports) for the `seL4_TCB_Configure()` syscall: the ADS to bind with the TCB, the PD which contains the CSpace to bind, the MO for the IPC buffer. 
-To increase the refcount to the fault endpoint, we would need to send another unwrapped cap. This could be worked around by breaking the `cpu_client_config()` call into multiple IPCs, but not counting the reference from the TCB is fine for a few reasons:
+To increase the reference count of the fault endpoint, we would need to send another unwrapped cap. This could be worked around by breaking the `cpu_client_config()` call into multiple IPCs, but not counting the reference from the TCB is fine for a few reasons:
 
 1. Freeing an endpoint involves revoking the endpoint, so the reference to the fault endpoint in the TCB will get deleted by this revocation
 2. A fault endpoint is typically freed if no PDs hold it. In this case, the listener of the endpoint has decided to explicitly free it, or it has exited. If there still exists any PD which depends on the listener PD for fault handling (causing a reference to the endpoint from this PD's TCB), the fault endpoint will have no receiver regardless of whether the endpoint has been freed or not. Thus, it is not necessary to keep the fault endpoint around if a TCB is still referring to it.

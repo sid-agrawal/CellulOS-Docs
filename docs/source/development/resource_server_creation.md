@@ -21,4 +21,4 @@ Any PD that satisfies the [resource server expectations](target_resource_server_
   - The resource server handles requests through callback functions provided to `resource_server_start`.
     - The `request_handler` callback is called when client PDs make requests through the resource server's endpoint, and passed the message contents.
     - The `work_handler` callback is called when the root task returns work for the resource server PD to complete. The utility function's main loop handles checking for a work notification from the root task, fetching work if there is a notification, and then passes the response message to the `work_handler`.
-  - The utility requires that a [nanopb RPC protocol](target_resource_server_rpc) is defined for the resource server.
+  - The utility requires that a [NanoPB RPC protocol](target_resource_server_rpc) is defined for the resource server.

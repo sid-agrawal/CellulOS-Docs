@@ -2,7 +2,7 @@
 Once you have completed the setup steps outlined in the [README](https://github.com/sid-agrawal/OSmosis), you can start running CellulOS.
 You should have created a build folder either for Qemu or Odroid-C4, depending on how you want to run the system.
 
-You most likely want to run a particular test or a suite of tests (prewritten tests [listed here](target_system_tests)).
+You most likely want to run a particular test or a suite of tests (pre-written tests [listed here](target_system_tests)).
 - From your build folder, run `ccmake .`
 - Modify the `LibSel4TestPrinterRegex` option to match the test(s) you intend to run.
 - If you are running any [CellulOS tests](target_system_test_types), then you must also enable the [GPIServerEnabled](target_configuration_options) option.
@@ -40,7 +40,7 @@ cp <odroid_build_folder>/images/sel4test-driver-image-arm-odroidc4 /srv/tftp/ima
 ```
 sudo picocom -b 115200 -f n  /dev/ttyUSB0
 ````
-3. Open a new terminal window and powercycle the machine:
+3. Open a new terminal window and power-cycle the machine:
 ```
 sudo su
 

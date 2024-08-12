@@ -3,7 +3,7 @@
 The cleanup policy refers to the steps taken to restore the system after a PD crashes or is terminated, and the implemented options are detailed [here](target_configuration_cleanup_policy). The options in CellulOS went through a few iterations, which will be documented here. 
 
 ## Metric-Based Cleanup
-In writing, we initally discussed a cleanup policy where we iterate through all active PDs and compare each one with the crashed PD via the RSI / FR metrics. If the values are above some threshold, we would also clean up the active PD. CellulOS [does not currently calculate the metrics at runtime](target_limitations_runtime_metrics), so we have not explored this route in implementation, but we were able to explore some depth-based cleanup policies as an initial step.
+In writing, we initially discussed a cleanup policy where we iterate through all active PDs and compare each one with the crashed PD via the RSI / FR metrics. If the values are above some threshold, we would also clean up the active PD. CellulOS [does not currently calculate the metrics at runtime](target_limitations_runtime_metrics), so we have not explored this route in implementation, but we were able to explore some depth-based cleanup policies as an initial step.
 
 ## Resource Deletion Policy
 Initially, we approached this issue from the perspective of resource deletion. When a PD crashes, we must be able to handle its held resources and any resource spaces it manages, so that the model state remains legal (no orphaned resources, etc.). We defined the following requirements:

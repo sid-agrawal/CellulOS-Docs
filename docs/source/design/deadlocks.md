@@ -77,7 +77,7 @@ Similarly to QNX's thread-hierarchy rule, Hubris has the "uphill send rule":
 
 ## CellulOS Async Message Design
 
-Both the existing work, and the advantages/disadvantes we considered for Cellulos, pointed towards Option 2 being the best approach. Next, we considered how to implement async messages. All designs would need a way for the root task to send information to PDs without blocking itself. If the root task needs some information in response, then this has to be sent in a separate `seL4_Call` initiated by the PD. 
+Both the existing work, and the advantages/disadvantages we considered for CellulOS, pointed towards Option 2 being the best approach. Next, we considered how to implement async messages. All designs would need a way for the root task to send information to PDs without blocking itself. If the root task needs some information in response, then this has to be sent in a separate `seL4_Call` initiated by the PD. 
 
 ### Async Design Options
 

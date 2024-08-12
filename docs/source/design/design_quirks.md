@@ -2,7 +2,7 @@
 
 This captures some quirks of the design that my be unintuitive.
 
-## Root TasK PD
+## Root Task PD
 
 In the model, the root task is a PD like any other, although it has access to all resources in the system. In practice, the root task itself provides most of the mechanisms used to track model state, so it cannot be treated as a "normal PD" in implementation. It is bootstrapped by the kernel, and starts up with an untracked address space, execution context, mapped memory, and other resources.
 
@@ -56,7 +56,7 @@ For HighJMP PDs, The `sel4gpi_get_bound_vmr_rde()` and `sel4gpi_get_ads_conn()` 
 A very implementation-specific explanation is provided below.
 ```
 
-For HighJMP PDs, swapping to a different ADS is an operation done on the CPU resource. In order to update the binded ADS resource and VMR endpoint references within the PD's [shared OSmosis data frame](target_glossary_shared_data), the root task would need to get the PD's CSlot for those endpoints, which isn't always tracked. An ADS endpoint is given to the CPU component during the `cpu_change_vspace` API call, but this is unwrapped into its badge values, and still cannot be used to update the PD's shared OSmosis data.
+For HighJMP PDs, swapping to a different ADS is an operation done on the CPU resource. In order to update the bound ADS resource and VMR endpoint references within the PD's [shared OSmosis data frame](target_glossary_shared_data), the root task would need to get the PD's CSlot for those endpoints, which isn't always tracked. An ADS endpoint is given to the CPU component during the `cpu_change_vspace` API call, but this is unwrapped into its badge values, and still cannot be used to update the PD's shared OSmosis data.
 
 ## App PD Heaps
 The Root Task and test PDs all use static-sized and statically allocated heaps, embedded in ELF data. Apps and non-root-task server PDs all have static-sized and *dynamically* allocated heaps, all of which start at the address defined by the `PD_HEAP_LOC` macro. The chosen address is an arbitrary one that is known to be free after a PD's ADS has been set up. The motive for this is convenience in isolating the heap for the HighJMP PD's ADSes.
