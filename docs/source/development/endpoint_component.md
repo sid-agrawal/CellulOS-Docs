@@ -30,6 +30,11 @@ Resource servers allocate the endpoints which they listen on via this endpoint c
 
 The raw listening endpoint will get freed when resource servers are cleaned up (if no other non-RT PD holds the badged endpoint), performs `seL4_CNode_Revoke()`, which deletes all the badged versions of the endpoint (representing resources). Any PDs still referencing the resource representation of the endpoint will be met with an `Invalid capability` error.
 
+## Badging Tracked Endpoints 
+```{attention}
+TODO Linh
+```
+
 ## Quirk about Fault Endpoints
 When a fault endpoint is allocated and configured in the CPU of a new PD, it exists in three different capability containers:
 1. The CSpace of the PD which allocated it
@@ -40,4 +45,4 @@ However, the third reference to the endpoint is not tracked as a reference by th
 To increase the reference count of the fault endpoint, we would need to send another unwrapped cap. This could be worked around by breaking the `cpu_client_config()` call into multiple IPCs, but not counting the reference from the TCB is fine for a few reasons:
 
 1. Freeing an endpoint involves revoking the endpoint, so the reference to the fault endpoint in the TCB will get deleted by this revocation
-2. A fault endpoint is typically freed if no PDs hold it. In this case, the listener of the endpoint has decided to explicitly free it, or it has exited. If there still exists any PD which depends on the listener PD for fault handling (causing a reference to the endpoint from this PD's TCB), the fault endpoint will have no receiver regardless of whether the endpoint has been freed or not. Thus, it is not necessary to keep the fault endpoint around if a TCB is still referring to it.
+2. A fault endpoint is typically freed if no PDs hold it. If a CPU object still exists despite the PD of which it is bound to having exited or terminated, then there will neither be a listener or sender of the fault endpoint. If the CPU object is to be reused, it will need to be reconfigured regardless, so it is fine for the fault endpoint to be revoked from it. 

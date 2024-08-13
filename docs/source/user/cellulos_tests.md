@@ -36,7 +36,7 @@ Low
 Spawns a very simple `hello` process-PD with a communication channel to the test PD. `hello` starts up, waits to be given an MO from the test PD, and then attaches it to a VMR.
 
 ## GPITH00X - Thread-PDs
-## Coverage Level
+### Coverage Level
 Medium
 
 ### Tested System Components
