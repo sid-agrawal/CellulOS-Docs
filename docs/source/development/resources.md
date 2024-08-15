@@ -39,6 +39,8 @@ It is possible for a PD to have more than one copy of a resource. For example, a
     :width: 700px
 ```
 
+In this example, PD 2 has opened the same file to two different file descriptors. The file system client maintains a mapping from the file descriptors to the CSpace slot containing the file capability, and in this case, both file descriptors would map to the same CSpace slot. If PD 2 closes one of the file descriptors, it still needs to keep the file capability. However, when it closes both file descriptors, then the root task revokes the capability.
+
 ### Removing Resources
 When a PD removes a resource (by closing a file descriptor, for instance), the reference count of the node in the hold registry is reduced. If the reference count of the hold node reaches zero, then hold node is deleted, and the root task revokes the resource capability from the PD. The PD will no longer be able to invoke it, and the slot that contained the capability will remain empty (see [revoked slots](target_limitations_revoke_slots) for more details).
 
