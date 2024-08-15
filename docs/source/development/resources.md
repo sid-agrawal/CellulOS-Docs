@@ -35,7 +35,7 @@ The root task maintains the metadata that tracks which resources each PD holds. 
 
 It is possible for a PD to have more than one copy of a resource. For example, a PD might open the same file to two different file descriptors, or two other PDs might send it the same MO. When this happens, the root task reuses the same resource capability in the PD's CSpace for all references to the resource. To track this, entries of the hold registry maintain their own reference count, tracking the number of copies of this resource that *this PD* holds. Entries of the hold registry will correspond to entries of the corresponding component or server's resource registry, as shown in the diagram below. The resource's component will track the *global* reference count.
 
-```{image} ../images/resource_registries.png
+```{image} ../figures/resource_registries.png
     :width: 700px
 ```
 
