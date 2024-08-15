@@ -26,10 +26,6 @@ The file system currently has a fixed size such that one file system will need h
 
 Upon startup of a file server, it requests the number of blocks corresponding to FS_SIZE from the ramdisk. The file server keeps the capability for each block in a static array, indexed by logical block number. When `xv6fs_bread` / `xv6fs_bwrite` is called, the file server retrieves the corresponding block's endpoint capability from the array, and sends the request to the ramdisk.
 
-## File Resources
-
-A file resource in the implementation represents an open file, although closed files continue to exist in the file system. A PD can create a new file resource by opening an existing, closed file by pathname, or by creating a new file entirely. Implicitly, a PD with a request edge to a file server has a hold edge to every file in the namespace, although it would be unnecessary for it to actually hold every file resource if it is not using them. When the model state is extracted, the file server indicates that client PDs hold every file in the namespace(s) they have access to.
-
 ## File Namespaces
 The file server implements a specific type of namespace, where namespaces are by default disjoint, and each namespace consists of the files within a particular namespace directory. 
 
@@ -40,6 +36,19 @@ Currently, model extraction ignores file names. I seems possible to also show fi
 ```{note}
 The question of whether / how to show file names in the model state is not fully fleshed out, and requires further investigation.
 ```
+
+## File Resources
+A file resource in the implementation represents an open file, although closed files continue to exist in the file system. A PD can create a new file resource by opening an existing, closed file by pathname, or by creating a new file entirely. Implicitly, a PD with a request edge to a file server has a hold edge to every file in the namespace, although it would be unnecessary for it to actually hold every file resource if it is not using them.
+
+(target_file_model_extraction)=
+## Model Extraction
+When the model state is extracted, the file server indicates that client PDs hold every file in the namespace(s) they have access to. It does this by first walking the file system (or the namespace's directory) and collecting the file IDs (inums) of all files. These are added to the subgraph with subset edges to the global file space and hold edges from the file server. If the client PD has a direct RDE to the global file space, then there is also a hold edge from the client PD to the file. If, instead, the client PD has an RDE to a namespace, then the file server adds a file resource in the namespace, which maps to the corresponding file resource in the global file space, and the client PD has a hold edge to the resource in the namespace. Only the files in the global file space map to blocks. 
+
+```{image} ../figures/file_namespace.png
+  :width: 700px
+```
+
+In this example, two KVstores are using different file namespaces, and each namespace has a different file name that maps to the same file in the file system (or global file space). The FS Server also has hold edges to the file and block resources, but these are omitted in the diagram for readability.
 
 ## File Client
 

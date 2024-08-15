@@ -39,11 +39,11 @@ Since the root task creates resources as badged versions of the resource server'
 ## Handling Work Requests
 The root task may occasionally need to notify a resource server of an event, or request some information from the resource server. All such communications are referred to as "work requests". Currently, the work request types are as follows:
 1. Model extraction: Request a subgraph of the model state from a resource server. The request will refer to a particular resource, or an entire resource space. 
-    - In the first case, the resource server is expected to prepare a subgraph including the specified resource and any map relations it has. 
-    - In the second case, the request also specifies a client PD ID, and the resource server is expected to provide a subgraph including any resources the client PD has access to, plus any map relations they have.
-    - A resource server only has to implement *one* of the above cases, and can send an empty response for the other. This allows flexibility for implicit resources; for example, for a file server, a PD may be able to access a number of files if it wishes to open them, but it doesn't have the resource capabilities until it actually opens the files. The file system implements the second case, so it can walk the file system and provide the subgraph that shows a client PD holding every file that it *could* open, not only the files it currently has open. In comparison, a ramdisk server could implement only the first case, since it expects a PD to hold a block resource for every block it has access to.
-2. Resource free: Informs a resource server that some instance of one of its resources is freed. For example, if a PD crashed while holding a file resource, we let the file server know. The resource server can implement some policy to decide whether it wants to destroy the resource, return it to a pool, or perform no operation.
-3. Resource space destroy: Informs a resource server that one of its resource spaces is destroyed. This can happen due to a cleanup policy. The resource server is expected to clean up any resources or metadata associated with the resource space. For example, if the file server is notified that its file resource space is destroyed, then it should release all of the blocks that the file system was using.
+    - **Resource-level extraction**: In the first case, the resource server is expected to prepare a subgraph including the specified resource and any map relations it has. The root task sends this request for every resource in a PD's hold registry.
+    - **Space-level extraction**: In the second case, the request also specifies a client PD ID, and the resource server is expected to provide a subgraph including any resources in the space that the client PD has access to, plus any map relations they have. The root task sends this request for every RDE in a PD's resource directory.
+    - A resource server only has to implement *one* of the above cases, and can send an empty response for the other. This allows flexibility for implicit resources; for example, for a file server, a PD may be able to access a number of files if it wishes to open them, but it doesn't have the resource capabilities until it actually opens the files. The file system implements the second case, so it can walk the file system and provide the subgraph that shows a client PD holding every file that it *could* open, not only the files it currently has open (more details [here](target_file_model_extraction)). In comparison, a ramdisk server could implement only the first case, since it expects a PD to hold a block resource for every block it has access to.
+2. Resource free: Informs a resource server that some instance of one of its resources is freed. For example, if a PD crashed while holding a file resource, we let the file server know. The resource server can implement some policy to decide whether it wants to destroy the resource, return it to a pool, or perform no operation. We do not believe there is any reason to "free" a resource space.
+3. Resource space destroy: Informs a resource server that one of its resource spaces is destroyed. This can happen due to a cleanup policy. The resource server is expected to clean up any resources or metadata associated with the resource space. For example, if the file server is notified that its file resource space is destroyed, then it should release all of the blocks that the file system was using. We have not yet encountered a reason to destroy a resource.
 
 ### Receiving Work Requests
 ```{image} ../figures/deadlock_avoidance_1.png
@@ -54,10 +54,26 @@ Every resource server has a notification *bound* to its TCB, meaning that signal
 
 If you are using `resource_server_utils`, the utility's main loop will take care of checking the notification and fetching the work, and will pass the work message to the resource server's `work_handler` callback.
 
+The structure of the work request is a message with one action, and up to 16 pieces of work.
+```
+message PdWorkReturnMessage {
+    PdWorkAction action = 1;                                            /* which work action to perform */
+    repeated uint32 space_ids = 2 [(nanopb).max_count = 16];            /* space IDs for the work */
+    repeated uint32 object_ids = 3 [(nanopb).max_count = 16];           /* object IDs for the work */
+    repeated uint32 pd_ids = 4 [(nanopb).max_count = 16];               /* client PD ID for the work */
+}
+```
+The action is one of *free*, *destroy*, or *extract*. The resource server can determine how many pieces of work were sent using the `object_ids_count` field of the message. The resource server obtains the arguments for the `i`'th piece of work from `space_ids[i]`, `object_ids[i]`, and `pd_ids[i]`.
+- For a *free* request, the relevant arguments are the `space_id` and `object_id`.
+- For a *destroy* request, the relevant argument is the `space_id`.
+- For an *extract* request, all arguments may be relevant. For a resource-level extraction, the `space_id` and `object_id` are used. For space-level extraction, the `object_id` is set to `BADGE_OBJ_ID_NULL`, and the `space_id` and `pd_id` arguments are used.
+
 ### Responding to Work Requests
-Currently, the root task expects a response to all types of work requests. For *resource free* or *resource space destroy* tasks, it just expects an acknowledgement that the resource server is done processing, which the resource server sends via the `finish_work` RPC call. For *model extraction* tasks, it expects the resource server to send a subgraph of the model state, sent via the `send_subgraph` RPC call.
+Currently, the root task expects a response to all types of work requests. For *free* or *destroy* tasks, it just expects an acknowledgement that the resource server is done processing, which the resource server sends via the `finish_work` RPC call. For *model extraction* tasks, it expects the resource server to send a subgraph of the model state, sent via the `send_subgraph` RPC call.
 
 #### Preparing a Model State
+When a resource server receives a work request of the type `EXTRACT`
+
 Resource servers need to prepare a portable model state subgraph for `send_subgraph` calls. The steps to do so are as follows:
 1. Calculate the number of pages needed for the model state: This can be done by calculating the number of nodes and edges, multiplying it by `sizeof(gpi_model_state_component_t)`, and adding `sizeof(model_state_t)`.
 2. Allocate an MO of the necessary size, attach it to the current address space, and initialize a model state at the start of the memory region. We use the functions in `model_exporting.h` to manage the model state. The model state can be initialized such that the nodes/edges will be stored in the MO's space following the model state struct. The utility function `resource_server_extraction_setup` will handle this step.
