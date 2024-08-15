@@ -54,3 +54,17 @@ In this example, two KVstores are using different file namespaces, and each name
 
 The file client `/apps/xv6fs/src/fs_client/fs_client.c` is the compatibility layer between libc and the file server. The file client tracks file descriptors at a per-PD level, so that libc may refer to file descriptors, and the file client converts an FD to a file resource before forwarding the request to the file server.
 - Since we do not model an FD as a resource, two processes cannot share a file offset (eg. as a parent and child would after a fork). A file offset is not an inherent property of a file, but rather a state being tracked by a process. A shared file offset could be modeled by something more general like “shared variable” resource, or even a memory object.
+
+The FS client installs the adapter functions `xv6fs_muslcsys_<...>` as syscall handlers using `muslcsys_install_syscall`. Some adapter functions are functional and connect to the file system, some are semi-functional and handle a subset of cases, and others are essentially no-ops to satisfy SQLite.
+
+| Functional | Semi-Functional | No-Op |
+|---|---|---|
+|`open`|`openat` (only works for cwd)|`fchmod`|
+|`access`|`faccessat` (only works for cwd)|`fsync`|
+|`fstat`|`fstatat` (only works for cwd)|`geteuid`|
+|`unlink`|`unlinkat` (only works for cwd)||
+|`write`|`getcwd` (always returns `/` since FS doesn't change directory)||
+|`read`|`fcntl` (ignores most operations, only sets flags locally)||
+|`pread64`|||
+|`lseek`|||
+|`close`|||
