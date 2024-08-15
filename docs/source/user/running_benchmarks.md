@@ -17,29 +17,23 @@ The benchmarking script located at `/scripts/bench` builds and runs a series of 
 ### Test Configuration
 - Tests first need to be configured in `sel4test` using `sel4bench` to output timing results:
 ```c
-static void print_result(uint64_t result)
-{
-    printf("RESULT>%lu\n", result);
-}
+#include <sel4gpi/bench_utils.h>
 
 int benchmark_something(env_t env)
 {
-    int error = 0;
-    ccnt_t start, end;
+    BENCH_UTILS_PD_INIT;
+    BENCH_UTILS_FN_INIT(2); // We will record 2 benchmarks in this function
 
-    sel4bench_init();
-
-    SEL4BENCH_READ_CCNT(start);
+    BENCH_UTILS_START();
     // do X
-    SEL4BENCH_READ_CCNT(end);
-    print_result(end - start);
+    BENCH_UTILS_END("X");
 
-    SEL4BENCH_READ_CCNT(start);
+    BENCH_UTILS_START();
     // do Y
-    SEL4BENCH_READ_CCNT(end);
-    print_result(end - start);
+    BENCH_UTILS_END("Y");
 
-    sel4bench_destroy();
+    BENCH_UTILS_PRINT();
+    BENCH_UTILS_DESTROY;
     return sel4test_get_result();
 }
 
@@ -57,6 +51,7 @@ DEFINE_TEST_WITH_TYPE_MULTIPLE(GPIBM002,
     OSM,
     true)
 ```
+- The benchmark values are collected throughout a function, and printed at the end of the function.
 - Then, add corresponding configuration(s) to the `run_benchmarks.py`
 ```python
 test_configurations = [
@@ -67,6 +62,7 @@ test_configurations = [
         "system_type": system_type_sel4test,  # for sel4utils test
         "pd_deletion_depth": 0,               # cleanup policy setting
         "rs_deletion_depth": 0,               # cleanup policy setting
+        "run_nanobench": False,               # don't enable nanobenchmarks in the GPI server
     },
     {
         "test_name": "GPIBM002",
@@ -75,6 +71,7 @@ test_configurations = [
         "system_type": system_type_osm,       # for osmosis test
         "pd_deletion_depth": 0,
         "rs_deletion_depth": 0,
+        "run_nanobench": False,
     },
     {
         "test_name": "GPIBM001",
@@ -82,7 +79,8 @@ test_configurations = [
         "bench_names": ["X", "Y"],
         "system_type": system_type_sel4test,
         "pd_deletion_depth": 0,
-        "rs_deletion_depth": 0,
+        "rs_deletion_depth": 0,        
+        "run_nanobench": False,
     },
 ]
 
@@ -90,9 +88,69 @@ selected_tests = test_configurations
 ```
 - If the system type is `system_type_osm`, then the script will enable `GPIServerEnabled`, otherwise it will be disabled.
 
+#### Configuration for Nanobenchmarks
+- Additionally, you can break down operations into "nano" benchmarks:
+```c
+#include <sel4gpi/bench_utils.h>
+
+int do_X()
+{
+    BENCH_UTILS_FN_INIT(2); // We will record 2 benchmarks in this function
+
+    BENCH_UTILS_START();
+    // do a
+    BENCH_UTILS_END_NANO("a");
+
+    BENCH_UTILS_START();
+    // do b
+    BENCH_UTILS_END_NANO("b");
+
+    BENCH_UTILS_PRINT();
+}
+
+int benchmark_something(env_t env)
+{
+    BENCH_UTILS_PD_INIT;
+    BENCH_UTILS_FN_INIT(1); // We will record 1 benchmark in this function
+
+    BENCH_UTILS_RECORD_NANO();
+    BENCH_UTILS_START();
+    // do X
+    BENCH_UTILS_END("X");
+    BENCH_UTILS_STOP_RECORD_NANO();
+
+    BENCH_UTILS_PRINT();
+    BENCH_UTILS_DESTROY;
+    return sel4test_get_result();
+}
+
+DEFINE_TEST_WITH_TYPE_MULTIPLE(GPIBM003, 
+    "benchmark something", 
+    benchmark_something,
+    OSM,
+    true)
+```
+- And add a corresponding configuration
+```python
+test_configurations = [
+    {
+        "test_name": "GPIBM003",
+        "run_type": run_type_reboot,
+        "bench_names": ["X_a", "X_b", "X"],     # Names of nano and regular results
+        "system_type": system_type_osm,
+        "pd_deletion_depth": 0, 
+        "rs_deletion_depth": 0, 
+        "run_nanobench": True,                  # Enable nanobenchmarks in the GPI server
+    }
+    // ...
+]
+```
+- Note that the `run_nanobench` option is specifically for enabling nanobenchmark outputs in the GPI server. If you add nanobenchmark outputs elsewhere, they will not be affected by this parameter.
+- The `BENCH_UTILS_RECORD_NANO` / `BENCH_UTILS_STOP_RECORD_NANO` macros print markers for the benchmark script, so it knows when to record nanobenchmark results. This way, we can ignore output for operations we don't want to track.
+
 ## Running Benchmarks
 This makes the assumption that your environment is set up as described in [booting](target_booting_assumptions).
-1. Choose which test configurations to run: in the script set, the `selected_tests` variable.
+1. Choose which test configurations to run: in the script, set the `selected_tests` variable.
 2. Set other configuration options:
     - Set the `n_iter_bits` to the adjust the number of iterations for each benchmark.
         - For tests where the board is not rebooted between every iteration, the number of reboots will 1, and the number of iterations per reboot will be `2^n_iter_bits`.
