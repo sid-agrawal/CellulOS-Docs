@@ -5,5 +5,6 @@ This section goes over the design of existing resource servers and apps in Cellu
 ```{toctree}
 design_ramdisk
 design_fs
+design_kvstore
 ```
 

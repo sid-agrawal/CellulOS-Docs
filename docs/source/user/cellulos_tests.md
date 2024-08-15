@@ -70,28 +70,34 @@ High
 - PD Cleanup policy following a crash
 
 ### Actions
+(target_test_kv001)=
 #### GPIKV001 (Same Process)
 - Spawns a KVstore client process with a KVstore server in the same ADS, as a static library. 
 - An FS and a Ramdisk resource server are spawned for the KVStore library to operate.
 
+(target_test_kv002)=
 #### GPIKV002 (Separate Processes)
 - Spawns a KVstore client process, and a KVstore server in another process. 
 - An FS and a Ramdisk resource server are spawned
 - The KVStore client and server processes share the same FS namespace
 
+(target_test_kv003)=
 #### GPIKV003 (Separate FS Namespace)
 Same setup as GPIKV002, except KVStore client and server use different FS namespaces
 
+(target_test_kv004)=
 #### GPIKV004 (Separate FS)
 - Spawns a KVstore client process, and a KVstore server in another process. 
 - Two FSess and one Ramdisk resource server are spawned - the FSes share the same Ramdisk
 - The KVStore client and server processes use different FSes
 
+(target_test_kv005)=
 #### GPIKV005 (HighJMP)
 - Spawns a KVstore client process with the KVStore server as a static library
 - KVStore client creates a new ADS for executing KVStore server code, and swaps ADSes every time the KVStore server library is invoked
 - An FS and a Ramdisk resource server are spawned for the KVStore library to operate.
 
+(target_test_kv006)=
 #### GPIKV006 (Separate threads)
 - Spawns a KVstore client process with the KVStore server as a static library
 - KVStore client main thread creates a separate thread to act as the KVStore server
