@@ -24,6 +24,10 @@ On aarch64, an [ASID pool](target_glossary_asid_pool) contains enough space for 
 ### Revoked Slots
 When we revoke a resource from a PD, we do not free the slot in its CSpace. This is so that the slot will not get filled with some other resource, potentially causing the PD to use the new resource unknowingly while it tries to use the old resource. If the system has a lot of revoked resources, these empty revoked slots could eventually fill up a CSpace. The alternative would be to have a handler in each PD to be notified when resources are revoked.
 
+(target_limitations_ramdisk_bound_page)=
+### Ramdisk Server Bound Page
+The ramdisk server keeps a shared memory page with each of its clients. The client can notify the server to unbind the page using `ramdisk_client_unbind`. However, if the client terminates without calling unbind, the ramdisk will not be notified, and the MO will remain attached to its address space. This has not been an issue in our test scenarios, since we have a small number of clients using the same ramdisk, and the ramdisk server is restarted between tests. A general solution to this problem would be to introduce a new type of async work task, which notifies a resource server when a client is disconnected (or equivalently, when an RDE is removed).
+
 ## Model State Extraction
 
 ### Partial State
