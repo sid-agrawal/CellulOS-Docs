@@ -3,6 +3,7 @@
 ## From Scratch
 To quickly create a resource server from scratch, you can use the "sample resource server" as a starting point.
 
+(target_create_resource_server)=
 ### Create the Server
 1. Duplicate the folder `/projects/sel4-gpi/apps/sample-resource-server`.
 2. Rename the files and variables to suit your resource server. Suppose your resource server will serve the resource type `X`:
@@ -19,6 +20,7 @@ To quickly create a resource server from scratch, you can use the "sample resour
     3. Replace references to `sample_server` in the test with `X_server`.
     4. Run your test - it should start your server and allocate one resource.
 
+(target_create_resource_server_blanks)=
 ### Fill in the Blanks
 These steps can be completed in any order.
 
@@ -102,7 +104,13 @@ These steps can be completed in any order.
     - Test the server's response to root task work. Try extracting the model state, crashing a PD while it holds resources from your resource server, and triggering your resource server's space to be deleted by a cleanup policy.
 
 ## From an Existing App
-
-```{attention}
-To be filled out.
-```
+You may have some existing server or library code, which you want to convert into a resource server.
+1. Design a client API. If your server already has an API, great! If not, you will want to determine what operations you need to expose in your API.
+    - The API will need to refer to resources; some operations will allocate resources, and others will operate on resources. Your app may or may not have an intuitive notion of a resource. For example, a ramdisk would intuitively provide block resources. A network driver might, less intuitively, provide buffers as a resource.
+    - Recall that IPC is often the slowest part of operations, so you need to find a balance between higher granularity operations (higher efficiency) and lower granularity operations (higher flexibility).
+    - You may choose to keep some logic in the client, rather than the server. For example, when converting the file system to a file server, we chose to keep track of file descriptors and file offsets in the client. This was to reduce complexity in the server and reduce IPC calls.
+2. Copy the sample resource server: it is probably simpler to copy the sample resource server and migrate your app logic to it, than to introduce resource server logic to your app. Follow the steps [here](target_create_resource_server).
+3. Create the client RPC protocol and migrate your server logic as described [here](target_create_resource_server_blanks).
+    - You will migrate just the server's logic to handle client requests, and the resource server utils library will handle the server's main event loop.
+    - You will likely need to add new logic to handle the root task's work requests in the `work_handler` function.
+4. Update clients / tests: You may need to modify existing clients or tests to use the new client API.
