@@ -7,4 +7,5 @@ resource_server_requirements
 resource_server_creation
 resource_server_communications
 registry_library
+resource_server_step_by_step
 ```
