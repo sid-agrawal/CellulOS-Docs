@@ -16,6 +16,19 @@ WIP
 There are two VMM implementations in *CellulOS*, both ported from seL4's Microkit [libvmm](https://github.com/au-ts/libvmm). 
 One implementation only seL4 utility libraries present in the [sel4test](https://github.com/seL4/sel4test) project, and the other uses only CellulOS APIs.
 
+## Building the Linux image from scratch
+### For CellulOS on QEMU
+The instructions here are similar to the [libvmm instructions](https://github.com/au-ts/libvmm/blob/main/examples/simple/board/qemu_virt_aarch64/README.md). 
+
+1. Clone the Linux repo: `git clone --depth 1 --branch v5.18 https://github.com/torvalds/linux.git`
+2. For the regular build, copy the `linux_config` file from `board/qemu_arm_virt`: `cp linux_config linux/.config`
+    - For the debug build, copy the `linux_debug_config` file instead.
+3. Update the `.config` with default values for any missing options: `make ARCH=arm64  CROSS_COMPILE=aarch64-none-elf- olddefconfig`
+    - You will be prompted to manually select config values if this step is omitted
+4. Build the kernel: `make ARCH=arm64 CROSS_COMPILE=aarch64-none-elf- all -j$(nproc)`
+5. The image to give to the CellulOS VMM is at `linux/arch/arm64/boot/Image`. 
+    - If compiling the debug version, the image with symbols that can be loaded in GDB is at `linux/vmlinux`.
+
 ## Source File Organization
 The source files for both implementations exist under one parent directory, [sel4-gpi/apps/vmm](https://github.com/sid-agrawal/sel4-gpi/tree/cellulos/apps/vmm) and are further divided between children `sel4test-vmm` and `osm-vmm` directories. There are a few common source files and headers, which are under `vmm-common` directories. 
 
