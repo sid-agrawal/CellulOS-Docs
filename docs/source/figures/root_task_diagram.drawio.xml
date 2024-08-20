@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36" version="24.7.7">
+  <diagram name="Page-1" id="-M3kQjLMIsmZi9ofpBVa">
+    <mxGraphModel dx="451" dy="887" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="2" value="seL4 Kernel" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontColor=#333333;" vertex="1" parent="1">
+          <mxGeometry x="325" y="520" width="280" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="3" value="Root Task" style="rounded=1;whiteSpace=wrap;html=1;verticalAlign=top;arcSize=7;" vertex="1" parent="1">
+          <mxGeometry x="280" y="330" width="370" height="170" as="geometry" />
+        </mxCell>
+        <mxCell id="4" value="seL4test Driver Thread" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;fontColor=#333333;strokeColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="290" y="360" width="90" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="5" value="GPI Server Thread" style="rounded=1;whiteSpace=wrap;html=1;verticalAlign=top;arcSize=8;fillColor=#f5f5f5;fontColor=#333333;strokeColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="390" y="360" width="250" height="130" as="geometry" />
+        </mxCell>
+        <mxCell id="6" value="MO Component" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="400" y="435" width="70" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="7" value="CPU&lt;span style=&quot;background-color: initial;&quot;&gt;&amp;nbsp;&lt;/span&gt;&lt;div&gt;&lt;span style=&quot;background-color: initial;&quot;&gt;Component&lt;/span&gt;&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="480" y="385" width="70" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="8" value="&lt;span style=&quot;background-color: initial;&quot;&gt;ADS&lt;/span&gt;&lt;span style=&quot;background-color: initial;&quot;&gt;&amp;nbsp;&lt;/span&gt;&lt;div&gt;&lt;div&gt;&lt;span style=&quot;background-color: initial;&quot;&gt;Component&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="400" y="385" width="70" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="9" value="PD Component" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="480" y="435" width="70" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="10" value="RESSPC Component" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="560" y="435" width="70" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="11" value="EP Component" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="560" y="385" width="70" height="40" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
