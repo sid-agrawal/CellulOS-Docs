@@ -49,7 +49,7 @@ Sharing VMR resources are handled by the ADS configuration system, as described 
 For convenience, all resources of a certain type can be shared in one API call, which is configured by using the `gpi_res_type_cfg` option. This is a list of resource types to be shared in bulk with the created PD. 
 
 ```{warning}
-This bulk sharing of resources by type currently only allows sharing of MO resources. While theoretically possible, it currently does not make sense to send all of the creator PD's CPU, ADS, EP resources to the created PD. For non-core resources (e.g. resources not managed by the Root Task), this is a [limitation](target_known_limits_non_core_res_transfer) of CellulOS, where complete tracking of non-core resources has not yet been implemented.
+This bulk sharing of resources by type currently only allows sharing of MO resources. While theoretically possible, it currently does not make sense to send all of the creator PD's CPU, ADS, EP resources to the created PD.
 ```
 
 ## Fault Handling
