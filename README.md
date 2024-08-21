@@ -1,6 +1,6 @@
 # CellulOS Documentation
 
-View the docs here: https://cellulosdocs.readthedocs.io/en/latest/
+View the docs here: https://cellulosdocs.readthedocs.io/en/cellulos/
 
 ## Building Locally
 
