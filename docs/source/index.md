@@ -5,7 +5,7 @@ This wiki is currently under construction
 ```
 
 ```{toctree}
-:maxdepth: 2
+:maxdepth: 1
 :caption: User Guide
 user/getting_started
 user/executing_code
@@ -16,7 +16,7 @@ user/running_benchmarks
 ```
 
 ```{toctree}
-:maxdepth: 2
+:maxdepth: 1
 :caption: Development
 development/development_overview
 development/resource_servers
@@ -26,7 +26,7 @@ development/endpoint_component
 ```
 
 ```{toctree}
-:maxdepth: 2
+:maxdepth: 1
 :caption: Design
 design/design_overview
 design/design_apps
