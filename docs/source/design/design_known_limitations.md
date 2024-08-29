@@ -45,13 +45,16 @@ When a PD requests a model extraction, the root task iterates over all PDs in th
 ### Runtime Metrics
 The system does not currently support calculating the model metrics (RSI & FR) at runtime. It would be possible to do so if we modify the model extraction utility to store the graph in a traversable data structure and implement the calculation algorithms.
 
+### Resource Space Metadata 
+The system does not currently track where metadata is stored for particular resource spaces. For example, an address space is not associated with the structure containing its metadata. Another example is that the file system does not show an association between the file space and the blocks used for file system metadata (ie. superblock and inodes). At a finer granularity, we might even want to track where metadata is stored for particular edges of the model. 
+
 ## Resource / PD Cleanup
 
 ### Fault Handler Dependencies
 The implementation does not explicitly track a "fault edge" between a PD and its fault handler, so it is unable to clean up a PD if its fault handler crashes. We suspect that this would be a non-configurable option to recursively follow fault edges and clean up all PDs along the path.
 
-### Resource Space Metadata
-The system does not currently track where metadata is stored for particular resource spaces. At a finer granularity, we might even want to track where metadata is stored for particular edges of the model. If we tracked a map relation from resource spaces to metadata, then we would count this relation as another potential dependency for resource space cleanup.
+### Cleaning up Resource Space Metadata
+As noted in the section above, we don't track where metadata is stored for resource spaces. If we tracked a map relation from resource spaces to metadata, then we would count this relation as another potential dependency for resource space cleanup.
 
 ## PD Creation
 
