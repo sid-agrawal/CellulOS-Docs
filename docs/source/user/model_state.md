@@ -1,6 +1,7 @@
 # Model State
 
-This section describes how to extract, view, and use the system's model state.
+This section describes how to extract, view, and use the CellulOS system's model state.
+See also the section on extracting a model state from Linux's `/proc` [below](target_proc_model_state).
 
 ## Setup
 The scripts located at `/scripts/model_state/` will process the raw CSV, upload it to Neo4j, and calculate RSI / FR metrics.
@@ -33,6 +34,7 @@ pass = <paste NEO4J_PASSWORD>
 Processing elevates the model state from implementation-level to model-level. For instance, in implementation one PD may switch between two address spaces, but in the model state this should appear as two separate PDs. The processing currently splits PDs with access to more than one ADS or CPU.
 1. Run `python csv_processing.py`. This will process all files in the current directory of the form `raw_<name>.csv` to `<name>.csv`.
 
+(target_visualize_model_state)=
 ## Visualizing Model State
 1. Upload CSVs: Neo4j aura requires files to be hosted at a publicly-accessible url (GitHub, Google Drive, etc.)
     - If you upload to Google Drive: You will have to upload files to a folder with link-sharing enabled, or individually enable link-sharing on each CSV. Copy the link, then modify it to a direct-download link:
@@ -42,7 +44,8 @@ Processing elevates the model state from implementation-level to model-level. Fo
     - Alternatively, in Google Sheets, clicking `File > Publish to the web`, and setting the link type to `CSV` will generate URL that Neo4j can access.
     - Note if using Google Drive: If you upload a file with the same name as a previous file and select 'Replace existing file', the download link should remain the same. Occasionally, if the file being replaced is several days old, the link will need to be updated.
 2. Paste the public links as strings into the `public_urls` array in `import_csv.py`.
-3. Import CSV to Neo4j: Run `python import_csv.py <idx>`, replacing `<idx>` with the index into the `public_urls` array of the CSV you want to import.
+3. Import CSV to Neo4j: Run `python import_csv.py -i <idx>`, replacing `<idx>` with the index into the `public_urls` array of the CSV you want to import.
+    - Adding the flag `-c` will cause different types of resources to be different types of nodes, so the graph is colour-coded and more readable. Currently, it is not possible to calculate the metrics on a graph uploaded with `-c`.
 4. In Neo4j, open your instance, and enter queries in the Query panel to visualize the graph.
 
 ### Sample Queries
@@ -135,3 +138,29 @@ RSI FILE: 1.0
 RSI BLOCK: 1.0
 FR: 1
 ```
+
+(target_proc_model_state)=
+# Proc Model State
+
+To demonstrate the extraction of model state from an entirely different system, we can build a model state from the contents of Linux's `/proc` virtual filesystem. We run some sample programs, and fetch the corresponding information from `/proc`. Currently, this extracts the following information:
+- Virtual memory regions, their permissions, and their purpose (heap, stack, file, etc.).
+- Physical memory regions and their mappings from virtual.
+- Devices which the physical memory regions originate from.
+
+## Setup
+1. Create the virtualenv: `python -m venv venv`.
+2. Activate the virtualenv: `source ./venv/bin/activate`.
+3. Install requirements: `pip install -r requirements.txt`.
+    - Or manually install packages: `pybind11`, `networkx`.
+4. Build the `pfs` module: `pfs` is a c++ library, so we use a `pybind` wrapper to generate a Python module from it.
+    - Enter the `pfs` directory: `cd pfs`.
+    - Build: `cmake . & make`.
+    - This should generate a python module: `/pfs/lib/pypfs.[...].so`.
+
+## Run
+1. In `proc_model.py`, choose the configuration of programs to run.
+    - You can choose an existing configuration by setting `to_run = run_configs[<idx>]` with the index of the chosen configuration.
+    - To add a new configuration and/or programs, ensure that the programs are built by the makefile, and add them to the `program_names` and `run_configs` variables.
+2. Activate the virtualenv: `source ./venv/bin/activate`.
+3. Run `sudo -E env PATH=./venv/bin python proc_model.py`.
+4. The resulting model state is saved to the `proc_model.csv` file, which can be imported into neo4j for visualization following the steps [above](target_visualize_model_state).
