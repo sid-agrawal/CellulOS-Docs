@@ -18,9 +18,10 @@ user/running_benchmarks
 ```{toctree}
 :maxdepth: 1
 :caption: Development
-development/development_overview
 development/resource_servers
 development/resources
+development/implementation_glossary
+development/virtual_machine_monitor
 development/troubleshooting
 development/endpoint_component
 ```
