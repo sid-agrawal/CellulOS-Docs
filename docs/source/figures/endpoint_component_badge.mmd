@@ -1,0 +1,26 @@
+---
+config:
+  noteAlign: "left"
+---
+sequenceDiagram
+    participant RT
+    participant PD 1
+    participant PD 2
+
+    note over PD 1: Allocated a GPI endpoint, EP_1
+    PD 1->>+RT: ep_client_badge(EP_1, PD_2, BADGE_VAL, ...)
+    note over RT: 1) Apply BADGE_VAL to raw endpoint of EP_1 <br/> 2) Create a copy of EP_1's GPI Endpoint <br/> 3) Copy both (1) and (2) to PD_2's CSpace
+    RT->>-PD 1: Slot of BOTH GPI endpoint and <br/> badged raw endpoint in PD_2's CSpace
+    PD 1->>PD 2: Send slot numbers of both GPI <br/> and raw endpoint for EP_1
+    note over PD 2: Directly access EP_1's badged raw endpoint
+
+    RT-->PD 2: Some time later
+
+    PD 2->>+RT: ep_client_get_raw_endpoint(EP_1)
+    note over RT: Copy EP_1's UNBADGED raw endpoint to PD_2's CSpace
+    RT->>-PD 2: Slot of unbadged raw endpoint in PD_2's CSpace
+    note over PD 2: Now has two copies of EP_1's raw endpoint. <br/> One is badged, and the other is not.
+    
+    
+
+

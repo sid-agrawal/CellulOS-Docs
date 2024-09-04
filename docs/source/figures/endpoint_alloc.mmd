@@ -1,0 +1,27 @@
+sequenceDiagram
+    participant RT
+    participant PD 1
+    participant PD 2
+
+    PD 1->>+RT: ep_component_client_connect()
+    note over RT: create 1) a badged endpoint to the RT <br/> 2) an unbadged, regular endpoint
+    RT->>-PD 1: 1: GPI endpoint slot, 2: raw endpoint slot 
+
+    activate PD 1
+    note over PD 1: EP_1: {ep: GPI endpoint, raw_ep: underlying endpoint}
+    PD 1->>+RT: pd_client_send_cap(PD_2, EP_1)
+    deactivate PD 1
+
+    note over RT: Place copy of EP_1's GPI endpoint in PD 2's CSpace
+    RT->>-PD 1: EP_1's slot in PD 2's CSpace 
+    activate PD 1
+    PD 1->>PD 2: send EP_1's slot number by any method
+
+    activate PD 2
+    note over PD 2: Receives slot number of EP_1's GPI endpoint <br/> EP_1: {ep: GPI endpoint, raw_ep: NULL Cap}
+    PD 2->>+RT: ep_client_get_raw_endpoint(EP_1)
+    deactivate PD 2
+
+    RT->>-PD 2: Raw endpoint slot in PD 2's CSpace
+    activate PD 2
+    note over PD 2: EP_1: {ep: GPI endpoint, raw_ep: underlying endpoint}

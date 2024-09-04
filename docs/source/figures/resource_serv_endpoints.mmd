@@ -1,0 +1,17 @@
+---
+config:
+  noteAlign: "left"
+---
+sequenceDiagram
+    participant RS as Resource Server
+    participant RT
+
+    note over RS: Allocate GPI endpoint, EP_1, <br/> to listen for resource requests
+    RS->>+RT: resspc_client_connect(EP_1.raw_endpoint,..)
+    note over RT: Set EP_1.raw_endpoint as a resource server endpoint <br/> EP_1's refounct is unchanged
+    RT->>-RS: Success
+    RS-->RT: Some time later
+    RS->>RT: pd_client_exit()
+    activate RT
+    note over RT: If RS is the last holder of EP_1, revoke all of EP_1's <br/> children, including all badged versions representing <br/> resources held by other PDs
+

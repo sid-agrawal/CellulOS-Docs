@@ -1,0 +1,17 @@
+---
+config:
+  noteAlign: "left"
+---
+sequenceDiagram
+    participant PD 1
+    participant PCM as PD Creation Module
+    participant RT
+
+    note over PD 1: Allocate GPI endpoint, EP_1, for faults <br/> Config_1: {..., fault_ep: EP_1, ...,}
+    PD 1->>PCM: Create PD with Config_1
+    PCM->>+RT: cpu_client_configure(fault_ep: EP_1.raw_endpoint, ...)
+    note over RT: seL4_TCB_Configure(...) <br/> EP_1's refcount is unchanged
+    RT->>-PCM: Success
+    PD 1-->RT: Some time later
+    PD 1->>RT: pd_client_exit()
+    note over RT: If RS is the last holder of EP_1, revoke all of EP_1's <br/> children, including the copy held by a CPU's TCB
