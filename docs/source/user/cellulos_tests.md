@@ -22,6 +22,25 @@ The project supports running tests in two ways:
 
 Plain sel4tests are defined using the `DEFINE_TEST` macro, and CellulOS tests are defined using the `DEFINE_TEST_OSM` macro. When run, the corresponding type of test process will be created. If you are running any CellulOS tests, then the [GPI Server](target_glossary_gpi_server) must be enabled through the `GPIServerEnabled` [ccmake option](target_configuration_options). If you are only running sel4test-style tests, then you can disable the GPI Server.
 
+## GPIADS00X - Address Space Management
+### Coverage Level
+Low
+
+### Tested System Components
+- MO allocation and ADS Attach (ADS001)
+- VMR Removal/Unmap (ADS002)
+- ADS Creation and Destruction (ADS003) 
+
+### Actions
+These are very basic ADS management tests to ensure core VMR allocation and removal functionalities aren't broken.
+
+## GPIBM00X - Benchmarking 
+### Coverage Level
+High
+
+### Tested System Components
+Although most benchmarks are quite basic, they run the most important functionalities for the system to operate properly, and so they do end up covering a large portion of the system.
+
 ## GPIPD00X - Simple process-PDs
 ### Coverage Level
 Low
@@ -70,6 +89,8 @@ High
 - PD Cleanup policy following a crash
 
 ### Actions
+These tests demonstrate the system's ability to run a Key-Value store built on top of SQLite. 
+
 (target_test_kv001)=
 #### GPIKV001 (Same Process)
 - Spawns a KVstore client process with a KVstore server in the same ADS, as a static library. 
@@ -104,7 +125,8 @@ Same setup as GPIKV002, except KVStore client and server use different FS namesp
 - An FS and a Ramdisk resource server are spawned for the KVStore library to operate.
 
 ```{attention}
-TODO Linh: explain the terrible thread hack used
+There is a terrible hack employed for using the file system client across thread-PDs. As described in [](target_known_limits_thread_cspace), accesses to CSlots in threads need to be done with care, as CSpaces are not synchronized between threads within the same process. The FS client is global for an entire process, and stores a MO as a shared message
+buffer for RPCs. Due to lack of time, this has not been refactored to allow for storing the CSlots of the MO for all threads that may be accessing the FS client. To allow GPIKV006 to run, the FS client is simple cleared and re-initialized when switching between different threads, to ensure the shared message MO slot is still valid.
 ```
 
 #### GPIKV007 (Two Sets)
@@ -112,3 +134,101 @@ The same setup as GPIKV002, however with two sets of KVStore client and server p
 
 #### GPIKV008 (Crash Test)
 The same setup as GPIKV003, however the Ramdisk crashes.
+
+## GPICL00X - System Cleanup
+### Coverage Level
+Medium
+
+### Tested System Components
+- Configurable Resource Cleanup Policies
+- Resource Server and Client Communication
+- Resource Server Resource Management 
+
+### Actions
+1. Creates a toy resource server, which interacts with a `hello` client PD
+2. Manually cause a crash by terminating the toy server
+3. Extract model state after the crash
+4. Clean up all resources depending on the configured [Resource Space Cleanup Policy Depth](target_configuration_cleanup_policy).
+
+## GPIVM00X - Virtual Machines
+### Coverage Level
+Medium
+
+### Tested System Components
+- Flexible PD Creation based on Configuration
+- PD Fault and interrupt handling
+- Cap slot synchronization between multiple thread-PDs
+- Running a guest OS as a PD
+
+### Actions
+1. Initializes the test PD as a VMM
+2. Creates a thread to handle guest-PD faults
+3. Starts a new guest from a specified kernel image
+
+#### GPIVM001
+Starts a baby-VM using the **sel4test** VMM implementation
+
+#### GPIVM002
+Starts a Linux VM using the **sel4test** VMM implementation
+
+#### GPIVM003
+Starts a baby-VM using the **OSmosis** VMM implementation
+
+#### GPIVM004
+Starts a Linux VM using the **OSmosis** VMM implementation
+
+## GPIMS00X - Model State Extraction
+### Coverage Level
+Very Low
+
+### Tested System Components
+- Graph-based model extraction functionalities
+
+### Actions
+Attempts to add nodes and edges to a model state structure that is eventually converted into CSV strings
+
+```{attention}
+The GPIFS00X, GPIRD00X, GPISQ00X tests are essentially elements of the GPIKV00X tests, broken into smaller, specific tests.
+```
+
+## GPIFS00X - File System
+### Coverage Level
+Medium
+
+### Tested System Components
+- File System Client and Server
+- File System Namespaces
+- Ramdisk Functionality
+- Resource Server and Client Communication
+
+### Actions
+1. Starts up Ramdisk and File System servers as PDs  
+2. Initializes the test PD as a file system client
+3. Performs various FS related syscalls (`open`, `write`, `close`, etc.)
+
+## GPIRD00X - Ram Disk
+### Coverage Level
+Medium
+
+### Tested System Components 
+- Ramdisk Functionality
+- Resource Server and Client Communication
+
+### Actions
+1. Starts up a Ramdisk resource server PD
+2. Test PD allocates blocks and attempts to write and read them
+
+## GPISQ00X - SQLite
+### Coverage Level
+Medium
+
+### Tested System Components 
+- Ramdisk Functionality (indirectly)
+- File System Client and Server (indirectly)
+
+### Actions
+1. Starts up Ramdisk and File System servers as PDs  
+2. Creates SQLite DBs
+3. Creates tables in DBs
+4. Insert, update, and delete table rows
+5. Shut down SQLite, the FS and Ramdisk servers, and clean up all test resources

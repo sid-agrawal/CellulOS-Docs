@@ -62,6 +62,14 @@ As noted in the section above, we don't track where metadata is stored for resou
 ### Shared ADS Configuration Options
 For scenarios with partially-shared address spaces, the configuration options allow for particular regions to be shared (same physical pages) or disjoint (separate physical pages). If a region is shared, it will be shared *at the moment the second ADS is created*. If one of the address spaces later modifies the region (eg. by replacing one or more physical pages), the second address space will not be updated to match. We are unsure whether or not we will add the option to update the shared regions in this way.
 
+(target_known_limits_thread_cspace)=
+### Thread-PD Capability Space Synchronization
+Threads-PDs each have their own capability spaces, which are currently **not synchronized**. Upon creating a new thread,
+the PD creation module does not attempt to copy caps from the creator thread into the same slots in the new thread,
+and any new caps allocated by threads within the same process-PD are not synchronized between them.
+The developer must ensure that references to caps across thread-PDs are valid, by manually sending caps allocated
+for a certain thread to other threads.
+
 ## Sample Apps
 
 ### File System
