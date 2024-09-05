@@ -1,0 +1,28 @@
+---
+config:
+  noteAlign: "left"
+---
+sequenceDiagram
+    participant G as guest-PD
+    participant K as seL4 Kernel
+    participant VMM
+    
+    activate G
+    note over G: executes some special instruction / <br/> accesses unmapped addresses / <br/> user error
+    G->>+K: fault
+    deactivate G
+    K->>G: block TCB
+    note over K: Allocate a reply cap in VMM
+    K->>-VMM: seL4_Call(fault_ep) <br/> on behalf of guest-PD
+    activate VMM
+    note over VMM: handle fault
+    VMM->>K: Increase guest's PC, <br/> write to TCB registers
+    deactivate VMM 
+    activate K
+    K->>G: TCB Resume
+    activate G
+    K->>VMM: Success
+    deactivate K
+    note over G: continuing execution
+    deactivate G
+

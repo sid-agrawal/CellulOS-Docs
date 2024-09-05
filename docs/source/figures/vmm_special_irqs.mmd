@@ -1,0 +1,28 @@
+---
+config:
+  noteAlign: "left"
+---
+sequenceDiagram
+    participant D as Device
+    participant K as seL4 Kernel
+    participant VMM
+    participant G as guest-PD
+    
+    activate G
+    note over G: continuing execution
+    D->>+K: interrupt
+    K->>G: block TCB
+    deactivate G
+    note over K: Allocate a reply cap in VMM
+    K->>-VMM: seL4_Call(fault_ep) <br/> on behalf of guest-PD
+    activate VMM
+    note over VMM: 1) fault label indicates it's a VPPI <br/> or VGIC Maintenance interrupt <br/> 2) handle interrupt
+    VMM->>K: seL4_ARM_VCPU_InjectIRQ()
+    deactivate VMM 
+    K->>G: inject interrupt
+    K->>VMM: Success
+    VMM->>G: seL4_Reply()
+    activate G
+    note over G: continuing execution
+    deactivate G
+
