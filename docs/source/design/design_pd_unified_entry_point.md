@@ -29,13 +29,10 @@ The `_start` entry-point provided by `sel4runtime` passes a pointer to the top o
 `x1` will contain an enum value indicating the PD started was one set up by `sel4utils`, in which case, control is passed to the unmodified `sel4runtime` libc initialization functions.
 
 ### CellulOS process-like PDs
-`x1` will contain an enum value indicating the PD started is a CellulOS PD. `[mod]` Control is passed to a custom CellulOS `sel4runtime` initialization function, [__sel4runtime_start_main_osm](https://github.com/sid-agrawal/sel4runtime/blob/ab4680f8ea94fd87c5f8028271af7ff43f4eb810/src/start.c#L25), which currently only calls the unmodified libc initialization functions and, eventually, the [](#cellulos-pd-exit-point).
+`x1` will contain an enum value indicating the PD started is a CellulOS PD. `[mod]` Control is passed to a custom CellulOS `sel4runtime` initialization function, [__sel4runtime_start_main_osm](https://github.com/sid-agrawal/sel4runtime/blob/14b51c9d61bab718dddca1fa1a10297e4fa6f445/src/start.c#L25), which currently only calls the unmodified libc initialization functions and, eventually, the [](#cellulos-pd-exit-point).
 
 ### CellulOS thread-like PDs
-```{attention}
-TODO Linh: update github link for __sel4runtime_start_entry_osm
-```
-`x1` contains the function address for the thread-like PD to start expecting. In this pathway, it's expected that libc has already been initialized for whatever ADS the PD is executing in. `[mod]` Control is passed to a custom entry function, `__sel4runtime_start_entry_osm`, which simply calls the user-provided function with arguments extracted from the stack and, eventually, the [](#cellulos-pd-exit-point). 
+`x1` contains the function address for the thread-like PD to start expecting. In this pathway, it's expected that libc has already been initialized for whatever ADS the PD is executing in. `[mod]` Control is passed to a custom entry function, [__sel4runtime_start_entry_osm](https://github.com/sid-agrawal/sel4runtime/blob/14b51c9d61bab718dddca1fa1a10297e4fa6f445/src/start.c#L37), which simply calls the user-provided function with arguments extracted from the stack and, eventually, the [](#cellulos-pd-exit-point). 
 
 ## Guest-OS PD Entry
 Guest-OS PDs are not routed through the entry and exit points described above. Their entry is simply the start address of the raw binary kernel image. 

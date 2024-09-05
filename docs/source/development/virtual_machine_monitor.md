@@ -1,27 +1,20 @@
 # The User-Space Virtual Machine Monitor
-
-```{attention}
-WIP
-```
+There are two VMM implementations in *CellulOS*, both ported from seL4's Microkit [libvmm](https://github.com/au-ts/libvmm). 
+One implementation uses only seL4 utility libraries present in the [sel4test](https://github.com/seL4/sel4test) project, and the other uses only CellulOS APIs.
 
 ## Status of different VMM Implementations
 
 
 |  guestOS  |  microkit  | non-OSM (sel4utils)  |     OSM     |     QEMU     |
 | --------- | ---------- | -------------------- | ----------  | -----------  | 
-|   Linux   |    Yes (Odroid and Qemu)     |        WIP (Odroid and Qemu)           |     WIP (Odroid and Qemu)     |  Assumed Yes |
-|  baby-VM  |     NA     |        WIP  (Odroid and Qemu)          |     WIP (Odroid and Qemu)     |     Yes      |
-
-
-There are two VMM implementations in *CellulOS*, both ported from seL4's Microkit [libvmm](https://github.com/au-ts/libvmm). 
-One implementation only seL4 utility libraries present in the [sel4test](https://github.com/seL4/sel4test) project, and the other uses only CellulOS APIs.
+|   Linux   |    Yes (Odroid and Qemu)     |        Yes (Odroid and Qemu)           |     Yes (Odroid and Qemu)     |  Assumed Yes |
+|  baby-VM  |     NA     |        Yes - Qemu, Not fully working on Odroid          |     Yes - Qemu, Not fully working on Odroid      |     Yes      |
 
 ## Building the Linux image from scratch
-### For CellulOS on QEMU
 The instructions here are similar to the [libvmm instructions](https://github.com/au-ts/libvmm/blob/main/examples/simple/board/qemu_virt_aarch64/README.md). 
 
 1. Clone the Linux repo: `git clone --depth 1 --branch v5.18 https://github.com/torvalds/linux.git`
-2. For the regular build, copy the `linux_config` file from `board/qemu_arm_virt`: `cp linux_config linux/.config`
+2. For the regular build, copy the `linux_config` file from `board/{platform}`, where `platform` is either `qemu_arm_virt` or `odroidc4`: `cp linux_config linux/.config`
     - For the debug build, copy the `linux_debug_config` file instead.
 3. Update the `.config` with default values for any missing options: `make ARCH=arm64  CROSS_COMPILE=aarch64-none-elf- olddefconfig`
     - You will be prompted to manually select config values if this step is omitted
@@ -29,10 +22,13 @@ The instructions here are similar to the [libvmm instructions](https://github.co
 5. The image to give to the CellulOS VMM is at `linux/arch/arm64/boot/Image`. 
     - If compiling the debug version, the image with symbols that can be loaded in GDB is at `linux/vmlinux`.
 
-## Source File Organization
-The source files for both implementations exist under one parent directory, [sel4-gpi/apps/vmm](https://github.com/sid-agrawal/sel4-gpi/tree/cellulos/apps/vmm) and are further divided between children `sel4test-vmm` and `osm-vmm` directories. There are a few common source files and headers, which are under `vmm-common` directories. 
+## Building the Buildroot image from scratch
+There has been no change to this process for CellulOS, and we follow the [libvmm instructions](https://github.com/au-ts/libvmm/tree/main/examples/simple/board/qemu_virt_aarch64#buildroot-rootfs-image).
 
-Due to the two implementations sharing identical function names whose arguments are differences in pointer types, only one set of source files can be built at a time (building both will result in a source file from one implementation potentially overwriting the other's). This is toggled via a CMake config variable: `VMMImplementation`, which can either be: `sel4test-vmm` or `osm-vmm`. See the [CMakeLists.txt](https://github.com/sid-agrawal/sel4-gpi/tree/cellulos/apps/vmm) file for details.
+## Source File Organization
+The source files for both implementations exist under one parent directory, [sel4-gpi/apps/vmm](https://github.com/sid-agrawal/sel4-gpi/tree/cellulos/apps/vmm) and are further divided between children `sel4test-vmm` and `osm-vmm` directories. Most source files are not implementation specific, and pass around references to a `vm_context_t` struct, which are defined by implementation specific headers. There are a few common file headers, which are under `gpivmm` directories. 
+
+Due to the two implementations sharing many common files, with most functions expecting one implementation of the `vm_context_t` struct, only one set of source files can be built at a time. This is toggled via a CMake config variable: `GPIVMMImplementation`, which can either be: `sel4test-vmm` or `osm-vmm`. See the [CMakeLists.txt](https://github.com/sid-agrawal/sel4-gpi/tree/cellulos/apps/vmm) file for details.
 
 ## VM Setup
 Currently, only a Linux guest on AARCH64 is supported. The guest is given a 256MB region of RAM, pass-through access to the vGIC CPU interface and serial UART device. Access to the GIC distributor is emulated by the VMM.
@@ -72,6 +68,65 @@ The sel4test Test Driver sets up an RPC channel between itself and all test proc
 
 For instance, when a certain device region is allocated in a test process, it makes a silent IPC request to the Task Driver for the region. For device regions that the Test Driver itself tries to set up prior to running tests (e.g. the UART, timer), it caches the device frames it has allocated. Upon receiving an allocation request, it makes a copy of the frame capability to transfer to the test process. See `serial_utspace_alloc_at_fn` in sel4test-driver's [main.c](https://github.com/sid-agrawal/sel4-gpi/blob/cellulos/apps/sel4test-driver/src/main.c#L632). 
 
+## Handling VM Faults and Interrupts
+When a PD initializes itself as a VMM, it will use the same endpoint to listen for faults from all guest-PDs that it handles. It creates a fault-handling thread that blocks on this endpoint, and requests for starting new guests are handled by the original thread. 
+In both `sel4test` and `osm` VMM implementations, the fault-handling thread's TCB is binded to a notification that is binded to various interrupts. This way, the VMM's fault-handling thread can be unblocked from listening on the fault endpoint when it receives an interrupt. 
+
+### Distinguishing Faults from Interrupts
+In order to distinguish faults from interrupts, the highest bit of the endpoint/notification badge is set to indicate that the VMM has been unblocked by an interrupt signal. For faults, the remaining lower bits encode the ID of the guest which is faulting (since the VMM uses the same endpoint to handle faults for ALL guests which it starts). For interrupts, the remaining lower bits encode the interrupt ID.
+
+### Fault Handling
+Faults generated by the guest first trap into the seL4 kernel, which then performs an `seL4_Call()` on behalf of the guest, using its fault endpoint. This blocks the guest-PD until it is either explicitly resumed by the VMM, or it receives a reply.
+Upon receiving the fault, the VMM handles it and, *in some cases*, manually resumes the guest-PD by increasing the guest's program counter and writing to its TCB registers. *In other cases* (particularly during interrupts), the VMM resumes the guest-PD by performing an `seL4_Reply()`.
+
+An overview of how the guest, VMM, and Kernel interact when handling faults or interrupts is show below:
+```{image} ../images/VMM_structure.jpg
+    :width: 700px
+```
+
+A sequence diagram of the fault handling process is show below:
+```{image} ../figures/vmm_faults.png
+    :width: 700px
+```
+
+
+### Interrupt Forwarding
+Devices that have not been passed-through to the guest will forward interrupts to the seL4 kernel. 
+
+#### VPPIs and VGIC Maintenance Interrupts
+*Specifically* for VPPIs (Virtual Private Peripheral Interrupts) and VGIC Maintenance Interrupts, the kernel delivers the interrupt to the VMM as a fault from the guest. A sequence diagram of the interrupt handling process is shown below:
+```{image} ../figures/vmm_special_irqs.png
+    :width: 700px
+```
+
+#### Other types of Interrupts
+Interrupts other than VPPIs and VGIC Maintenance Interrupts are signaled through a notification, only if the interrupt handler has been binded to the notification. 
+
+Devices that have been passed through to the guest will directly interrupt the guest without trapping into the VMM. It can still trap into the VMM if it requires intervention from the host. For instance, when the serial UART device is waiting for user-input, this traps into the VMM, as the user interacts with the guest's console through the host.
+
+#### Interrupt Handler Notification for OSmosis PDs
+For the OSmosis VMM implementation, the notification bound to the VMM's fault-handler thread's TCB is the same one that is used for {doc}`deadlock avoidance </design/deadlocks>`. OSmosis PDs are automatically allocated an endpoint, and upon assigning a CPU to the PD, the CPU's TCB is binded to the PD's notification. This allows the CPU to be unblocked from listening on any endpoint when the PD's notification is signaled. 
+By default, a badged version of the notification is used by the Root Task. For the PD to be able to receive interrupts, the `pd_client_irq_handler_bind()` API call mints another badge on this notification for the interrupt, and binds it to an seL4 IRQ handler.
+This currently only allows one interrupt to be handled by a PD at a time.
+
+#### Interrupt Handler Caps
+The seL4 interrupt handler cap of a given IRQ ID can be retrieved *only once* throughout the entire system, however it can be copied as many times as needed. To allow multiple PDs (including non-OSmosis ones) to retrieve this cap, the GPI server stores an array of retrieved IRQ handler caps. This array is shared with the sel4test driver thread. OSmosis PDs retrieve these IRQ handler caps through CellulOS API calls, and non-OSmosis PDs contact the sel4test driver through their fault endpoints.
+
+## ARM GIC Distributor and vCPU Interface
+The VMM currently gives the guest-PD pass-through to the GIC's virtual CPU interface region. The guest-PD uses this interface to determine whether it has received an interrupt, and to indicate that it has handled any pending interrupts. VGIC Maintenance Interrupts are generated (and trapped to the seL4 kernel, then VMM) in response to the guest-PD activities in the vCPU interace. More information from the ARM manual is [here](https://developer.arm.com/documentation/ihi0048/b/GIC-Support-for-Virtualization?lang=en).
+
+The GIC distributor region is not hardware-virtualized and must be emulated by the VMM for the guest-PD. The guest will try to enable and disable specific interrupts by reading and writing to this region, which will generate page faults. Upon receiving these page faults, the VMM detects that the faulting address is within the GIC distributor region, determines which GIC distributor register is being accessed based on an offset from the base distributor address, and reads/writes the emulated register.
+
+## Known Limitation: OdroidC4 Serial Device Contention 
+As CellulOS doesn't handle any page faults, a PD may silently crash when it encounters one. We have added printing within the seL4 kernel when a page fault occurs, to make it more visible for debugging. If in kernel debug mode, when the VMM allows its guest-PDs pass-through to the serial device, it will clobber the kernel's usage of the serial device and vice versa. 
+
+As described in the [](#arm-gic-distributor-and-vcpu-interface) section, the guest-PD will cause page faults when it tries to access the GIC distributor, which then causes the kernel to print a debug message. On the odroid, these debugging kernel prints will clobber something in the guest-PD and prevent it from enabling interrupt forwarding for its hardware timer. This causes an infinite loop of timer interrupts being delivered to the VMM, which will keep getting dropped the guest, since it was previously prevented from enabling the forwarding of the timer interrupt.
+
+To prevent this, we have currently just disabled the page-fault debug prints from within the kernel on the odroid.
+
+## Running the `sel4test` VMM tests
+There are four [system tests](target_vmm_tests) for starting a VMM and a guest-PD. The OSmosis VMM runs the VMM and guest-PD as OSmosis PDs, which get cleaned up by the CellulOS cleanup policies, and thus can be run consecutively without issue. The sel4test VMM, however, does not get properly cleaned up by the sel4test driver, and thus will encounter resource allocation issues if ran consecutively.
+
 ## OdroidC4 CellulOS Image Relocation
 On the Odroid, by default, early-boot ELFLoader tries to load the sel4test-driver image somewhere around physical address `0x3000000`.The secure monitor region starts at `0x5000000`, so the image cannot extend past this. This normally works if the driver's image is small enough (e.g. Linux guest image isn't embedded in the ELF or the static heap size isn't too large). 
 
@@ -80,69 +135,10 @@ However, in our current setup, it is not enough, and the sel4test-driver image m
 ## References to `GUEST_VCPU_ID`
 The GIC distributor region emulation is done per CPU. The current implementation assumes the guest does not have `SMP` enabled, and has references to `GUEST_VCPU_ID` floating around, which is just for convenience, as an index to the first (and only) virtual CPU. 
 
-## (WIP) Old Notes
-### Specific Memory Regions
+## Kernel Serial Driver vs. User-space Serial Driver
+By default, we build seL4 on debug mode, so all user-space printing is routed to the kernel's serial driver through a debug syscall. The user-space serial driver (provided by the `sel4platsupport` library) can be enabled by toggling the `LibSel4PlatSupportUseDebugPutChar` CMake config option. 
 
-These need to be set up in the vCPU’s VSpace
-
-- Linux image’s DTS expects guest RAM at `0x40000000` (default is 256 MB)
-    - Guest’s DTB and RAM Disk addresses are then just placed within this region
-- Serial device address (board-dependent)
-    - for QEMU, one page at a specified region
-    - for the Odroid, three different pages and regions (not sure why)
-- GIC device address (specific to ARM and board-dependent)
-
-### Caps/Resourced Needed for VMM to Setup Guest
-
-Currently running VMM as a sel4test process, but if we were to run it just as an independent process, we would need:
-
-- VKA
-- RT’s IRQControl cap (or a minted handler)
-- access to its own VSpace and the root page table for its VSpace
-- an ASID Pool (if using a previously created one)
-- a simple object (currently on used to get the RT’s TCB for setting scheduling priority to max - need to look into whether it will still be scheduled to run if priority is set using only the test or other parent process’s TCB)
-
-### Loading in VM Images
-
-- requires ~40MB total, ensure that whatever process is loading the VM has enough of this in untyped
-    - If we run out of memory, check the following:
-        - virtual pool range of the loading process’s allocation manager
-        - the amount of untyped memory available for the loader (is it being given to other things first?)
-        - the loading process’s CSpace size - may run out of slots (although if mapping is done with large pages, this shouldn’t really be an issue)
-- binaries are placed in ELF under specific sections and with specific symbol names, see `projects/sel4-gpi/vmm/tools/package_guest_images.S`
-    - to build as part of the sel4test-driver, requires passing in path of the guest kernel image (currently built separately), guest DTB image (built from a DTS using `dtc`), and a guest RAM disk image (currently built separately)
-    - this is then `memcpy`'d to the expected virtual addresses for the guest, which is kind of wasteful - is there some way we can avoid this (maybe via linker script)?
-
-### Build Quirks
-
-- original VMM is linked using LLVM’s LLD instead of GCC’s default `ld`, can be specified in cmake with `add_link_options("-fuse-ld=lld")`
-    - currently doesn’t work, as cmake can’t find `lld` in PATH despite it being included
-    - also using GCC’s default linker doesn’t seem to have any issues at the moment
-- the rest of the entire project specifies board names with hyphens, e.g. `qemu-arm-virt`, but the VMM uses underscores, since certain symbols are defined using the board name (which can’t have hyphens)
-    - currently, we just swap to the correct name in CMakeLists.txt if we’re building the vmm files, but this could (should?) change b/c we should ideally parse the DTS for this
-
- 
-
-### Microkit Quirks
-
-- refer to `tool/microkit/**main**.py` if you need to figure out what some arbitrarily hardcoded slot number is referring to (use specifically Ivan’s fork: `git clone [https://github.com/Ivan-Velickovic/microkit.git](https://github.com/Ivan-Velickovic/microkit.git) --branch dev`)
-- microkit doesn’t use any threads, and ends up disabling the TLS keyword, which conflicts with our current system (which relies of sel4 runtime and does require proper definition of the TLS keyword) → see comment in microkit repo: `monitor/src/main.c`
-
-### Future TODO
-
-- most interrupts (except for serial device) are currently disabled b/c it was previously routed through microkit’s version of IPC (e.g. a “channel” between a defined PD and the microkit monitor)
-    1. to convert it, get a ref to the RT’s IRQControl cap, then mint an IRQ handler off of this
-    2. set up a notification object for the interrupt, and something to listen for notifications on it
-    3. pair this notification object with the IRQ handler
-- further investigate how it’s possible that `libsel4platsupport` is able to set up a serial device during bootstrapping of the RT, and we can then get a frame cap to the *same* region in the VMM → could be giving the VMM process the same untyped memory chunk that `libsel4platsupport` is using
-- set up fault handler - VMM currently has a fault EP, but just doesn’t do anything with it
-- there are a bunch of statically defined cap slots holding various caps (remnant from Microkit) that haven’t been dynamically allocated yet - it currently isn’t an issue bc our VM doesn’t do anything after booting up
-- In current state of project, VMM test can never reserve enough for the guest RAM region for some reason → potentially caused by MO cap forging taking up a lot of virtual range
-- set up a blocking loop for VMM to handle faults and interrupts for guest - currently just indefinitely yielding
-
-### Misc Stuff
-
-- define `ZF_LOG_LEVEL` in CMakeLists.txt to get the sel4 util logs showing
-- attempted to enable dynamic morecore. for some reason, it’s being called before the initial static mem for morecore is even initialized
-    - happens somewhere in `sel4utils_bootstrap_VSpace_with_bootinfo_leaky`, specifically a call to the VSpace function for allocating new pages
+```{note}
+This currently only works for the `sel4test` VMM implementation, as the sel4platsupport library's serial driver uses the seL4 utils VKA allocators for getting device frames. We haven't implemented an OSmosis-only serial driver, nor have we refactored sel4platsupport library to use CellulOS API calls, so this will not work for OSmosis PDs.
+```
 

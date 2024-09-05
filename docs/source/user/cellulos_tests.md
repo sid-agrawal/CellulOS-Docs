@@ -1,10 +1,6 @@
 (target_system_tests)=
 # System Tests
 
-```{attention}
-WIP
-```
-
 There are various tests which can be run to both demonstrate a certain functionality of the system and to ensure that core functionalities have not been broken by an update. Each test listed here is described by three dimensions:
 1. Coverage level [low, med, high]: how much of the system the test invokes. If a non-trivial update has been implemented, and the tests run without issue:
     - low = the most common system features still function as expected, but it is likely that bugs exist in more complex code paths
@@ -12,6 +8,11 @@ There are various tests which can be run to both demonstrate a certain functiona
     - high = there is more confidence that the non-trivial code update is robust, as this test uses a large set of the system's features. Remaining bugs are likely subtle and obscure 
 2. Tested system components: the specific components which the test uses
 3. Actions: description of what the test does
+
+```{tip}
+If running one test at a time, here is a handy command for quickly configuring CMake:
+`cmake -S $gpi -B $build -DLibSel4TestPrinterRegex=<Test>` where `$gpi` and `$build` are the paths to the `projects/sel4-gpi` and the build directory, respectively.
+```
 
 (target_system_test_types)=
 ## Test Types
@@ -150,6 +151,7 @@ Medium
 3. Extract model state after the crash
 4. Clean up all resources depending on the configured [Resource Space Cleanup Policy Depth](target_configuration_cleanup_policy).
 
+(target_vmm_tests)=
 ## GPIVM00X - Virtual Machines
 ### Coverage Level
 Medium

@@ -70,8 +70,5 @@ Potential solutions include:
 2. For CellulOS tracked resources, toggling the `GPI_DEBUG` log topic, and ensuring that reference counts for the problem capability increase/decrease according to expectation.
 3. Checking both CNodes and TCBs as potential capability containers. TCBs are often forgotten about as containers that capabilities may need to be freed from.
 
-## Unexpected Null Cap Invocation
-### Thread PDs
-### CNode guard is 0
-
-## No RDE found
+## Strange Behaviour During Root Task IPCs
+One known source of strange and unexpected behaviour when the Root Task handles API requests is when the [RPC_MSG_MAX_SIZE](https://github.com/sid-agrawal/sel4-gpi/blob/cellulos/libsel4gpi/src/resource_component_utils.c#L17) value is not large enough to hold the largest nanopb message. The `RPC_MSG_MAX_SIZE` is used to allocate static buffers to copy message contents from nanopb, and if not large enough, will result in a buffer overflow.
