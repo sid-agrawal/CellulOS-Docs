@@ -26,6 +26,7 @@ The scripts located at `/scripts/model_state/` will process the raw CSV, upload 
     pass = <paste NEO4J_PASSWORD>
     ```
 
+(target-extracking-model-state)=
 ## Extracting Model State
 1. During a test, print the model state to console using the `pd_client_dump` API call.
     - When running the [system tests](target_system_tests), you can enable model state extraction with the `GPIExtractModel` [configuration option](target_configuration_options).
