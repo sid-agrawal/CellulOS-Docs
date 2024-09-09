@@ -126,4 +126,4 @@ The development of the CellulOS prototype is mainly done by:
 
 The development of the OSmosis model is mainly driven by Sid Agrawal with inputs from:
 * Students: Arya Stevinson | Linh Pham | [Shaurya Patel](https://shauryapatel1995.github.io/)
-* Faculty: [Prof. Margo Seltzer](https://seltzer.com/margo) | [Prof. Reto Achermann](https://retoachermann.ch/) | [Prof. Aastha Mehta](https://aasthakm.github.io/)
+* Faculty: [Prof. Margo Seltzer](https://www.seltzer.com/margo) | [Prof. Reto Achermann](https://retoachermann.ch/) | [Prof. Aastha Mehta](https://aasthakm.github.io/)
