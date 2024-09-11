@@ -78,12 +78,14 @@ These are instructions for uploading a model-state CSV to a Neo4j Aura (cloud) i
 
 ### Sample Queries
 - Everything: Not recommended when the graph is large.
-```
+
+```CYPHER
 MATCH p=(()-[]-())
 RETURN p
 ```
+
 - Everything But: Show everything, excluding certain resource types and/or PDs.
-```
+```CYPHER
 // Specify resource types to exclude, and PD IDs to exclude
 WITH  ["VMR", "BLOCK"] AS ignore_types, ["PD_0", "PD_1"] AS ignore_pds
 MATCH p=((a)-[]-(b))
@@ -92,12 +94,12 @@ WHERE ((a:PD AND NOT a.ID IN ignore_pds) OR ((a:RESOURCE OR a:RESOURCE_SPACE) AN
 RETURN p
 ```
 - PDs only: Shows PD nodes and the relationships between them.
-```
+```CYPHER
 MATCH pdpaths=((:PD)-[]->(:PD))
 RETURN pdpaths
 ```
 - PDs and resource spaces: Shows PD nodes, resource space nodes, and the relationships between them.
-```
+```CYPHER
 // Get PD & Resource Space relations
 MATCH pd_pd_paths=((:PD)-[]->(:PD))
 RETURN pd_pd_paths AS paths
@@ -109,7 +111,7 @@ MATCH rs_rs_paths=((:RESOURCE_SPACE)-[]->(:RESOURCE_SPACE))
 RETURN rs_rs_paths AS paths
 ```
 - Files Overview: Shows PDs, resource spaces, files, and relations to files.
-```
+```CYPHER
 // Get PD & Resource Space relations
 MATCH pd_pd_paths=((:PD)-[]->(:PD))
 RETURN pd_pd_paths AS paths
@@ -136,7 +138,7 @@ MATCH p3=((:RESOURCE {DATA: 'FILE'})-[*0..1]->()<-[]-())
 RETURN p3 AS paths
 ```
 - Visualize RSI: Shows resources of a particular type shared between two PDs, at any depth.
-```
+```CYPHER
 WITH "PD_3.0" as pd1, "PD_4.0" as pd2, "FILE" as type
 
 // Find all accessible resources of the type
@@ -150,13 +152,13 @@ RETURN p1, p2
 ## Calculating Metrics
 1. Identify the IDs of the PDs you wish to compare.
 2. Add an entry to the `configurations` array in `metrics.py`:
-```
+```json
 {'file': '<processed_csv_filename>.csv', 'pd1': '<first PD ID>', 'pd2': '<second PD ID>'}
 ```
 3. Run `python metrics.py <idx>`, replacing `<idx>` with the index of the desired configuration in the `configurations` array.
     - The metrics script does connect to Neo4j, so it is essential that the corresponding file is also imported in your Neo4j instance.
 4. The script will output the RSI and FR values for the chosen PDS, something like this:
-```
+```BASH
 Calculating metrics for 'kvstore_007.csv' (PD_6.0,PD_7.0)
 RSI VMR: 0.0
 RSI MO: 0.0
