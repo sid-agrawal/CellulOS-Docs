@@ -177,7 +177,7 @@ To demonstrate the extraction of model state from an entirely different system, 
 - Physical memory regions and their mappings from virtual.
 - Devices which the physical memory regions originate from.
 
-## Setup
+## Setup on Ubuntu Host
 1. Create the virtualenv: `python -m venv venv`.
 2. Activate the virtualenv: `source ./venv/bin/activate`.
 3. Install requirements: `pip install -r requirements.txt`.
@@ -186,11 +186,85 @@ To demonstrate the extraction of model state from an entirely different system, 
     - Enter the `pfs` directory: `cd pfs`.
     - Build: `cmake . & make`.
     - This should generate a python module: `/pfs/lib/pypfs.[...].so`.
+    - Copy the example files `cp pfs/out/hello* ../`
 
+## Setup on Buildroot based Qemu VM 
+This is mainly to ensure that our `proc` based extraction has all the needed dependencies inside a buildroot based linux VM on both x86_64 and AARCH64
+
+### x86_64
+```bash
+# Clone & build
+git clone --branch git@github.com:sid-agrawal/buildroot.git
+cd buildroot
+
+# For 
+cp osmosis_configs/qemu_x86_config .config
+make # first build takes a while so bump up with -j 12 
+
+# Copy files
+export OSMOSIS_DIR="~/OSmosis" # Setup as it applies to you :)
+cp -r $OSMOSIS_DIR/scripts/proc output/target/root/
+
+pushd
+# Copy the .so files and hello* files
+cd output/build/libpfs-1.0.2/lib 
+cp lib/pypfs.cpython-310-x86_64-linux-gnu.so ../../target/root/proc/pfs/lib/cpython-310-x86_64-linux-gnu.so
+cp lib/libpfs.so ../../target/root/proc/pfs/lib/libpfs.so
+cp out/hello* ../../target/root/proc 
+
+# Delete files as needed and then remake
+popd
+make # This one should be quick.
+
+# Start Qemu
+output/images/start_qemu.sh
+
+# Once linux is booted, loging with username "root" and no password.
+# Dump some example model state
+cd /root/proc
+python3 ./proc_model.py
+```
+
+### AARCH64
+
+```bash
+# Clone & build
+git clone --branch git@github.com:sid-agrawal/buildroot.git
+cd buildroot
+
+# For 
+cp osmosis_configs/qemu_arm_config .config
+make # first build takes a while so bump up with -j 12 
+
+
+# Copy files
+export OSMOSIS_DIR="~/OSmosis" # Setup as it applies to you :)
+cp -r $OSMOSIS_DIR/scripts/proc output/target/root/
+
+# Delete files as needed and then remake
+
+# Copy the .so files and hello* files
+cd output/build/libpfs-1.0.2/lib 
+cp lib/pypfs.cpython-310-x86_64-linux-gnu.so ../../target/root/proc/pfs/lib/cpython-310-aarch64-linux-gnu.so
+cp lib/libpfs.so ../../target/root/proc/pfs/lib/libpfs.so
+cp out/hello* ../../target/root/proc 
+make # This one should be quick.
+
+# Start Qemu
+output/images/start_qemu.sh
+
+# Once linux is booted, loging with username "root" and no password.
+# Dump some example model state
+cd /root/proc
+python3 ./proc_model.py
+
+<< Unresolved how to make arm binaries compiel>>
+```
 ## Run
 1. In `proc_model.py`, choose the configuration of programs to run.
     - You can choose an existing configuration by setting `to_run = run_configs[<idx>]` with the index of the chosen configuration.
-    - To add a new configuration and/or programs, ensure that the programs are built by the makefile, and add them to the `program_names` and `run_configs` variables.
+    - To add a new configuration and/or programs, ensure that the programs are built by the `pfs/osmosis_examples`, 
+      and add them to the `program_names` and `run_configs` variables, and copy them to the `proc` directory.
 2. Activate the virtualenv: `source ./venv/bin/activate`.
 3. Run `sudo -E env PATH="./venv/bin:$PATH" python proc_model.py`.
     - We need to include the regular `$PATH` (or `/usr/bin/`) for access to `sudo` for the namespace example.

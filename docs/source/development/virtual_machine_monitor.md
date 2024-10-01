@@ -24,7 +24,30 @@ The instructions here are similar to the [libvmm instructions](https://github.co
     - If compiling the debug version, the image with symbols that can be loaded in GDB is at `linux/vmlinux`.
 
 ## Building the Buildroot image from scratch
-There has been no change to this process for CellulOS, and we follow the [libvmm instructions](https://github.com/au-ts/libvmm/tree/main/examples/simple/board/qemu_virt_aarch64#buildroot-rootfs-image).
+
+```bash
+git clone --branch git@github.com:sid-agrawal/buildroot.git
+cd buildroot
+cp osmosis_configs/cellulos_arm_config-with-everything .config
+make # first build takes a while so bump up with -j 12 
+
+pushd
+cd output/build/libpfs-1.0.2
+cp lib/pypfs.cpython-310-x86_64-linux-gnu.so ../../target/root/proc/pfs/lib/cpython-310-x86_64-linux-gnu.so
+cp lib/libpfs.so ../../target/root/proc/pfs/lib/libpfs.so
+cp out/hello* ../../target/root/proc 
+popd
+
+
+# Remake
+make 
+
+cp output/images/rootfs.cpio.gz projects/sel4-gpi/apps/vmm/board/qemu_arm_virt/rootfs.cpio.gz 
+```
+
+
+These steps are based the [libvmm instructions](https://github.com/au-ts/libvmm/tree/main/examples/simple/board/qemu_virt_aarch64#buildroot-rootfs-image).
+We have mainly changed them to add support for python, some python packages, and pfs library.
 
 ## Source File Organization
 The source files for both implementations exist under one parent directory, [sel4-gpi/apps/vmm](https://github.com/sid-agrawal/sel4-gpi/tree/cellulos/apps/vmm) and are further divided between children `sel4test-vmm` and `osm-vmm` directories. Most source files are not implementation specific, and pass around references to a `vm_context_t` struct, which are defined by implementation specific headers. There are a few common file headers, which are under `gpivmm` directories. 
