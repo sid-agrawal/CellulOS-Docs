@@ -194,7 +194,7 @@ This is mainly to ensure that our `proc` based extraction has all the needed dep
 ### x86_64
 ```bash
 # Clone & build
-git clone --branch git@github.com:sid-agrawal/buildroot.git
+git clone --branch cellulos git@github.com:sid-agrawal/buildroot.git
 cd buildroot
 
 # For 
@@ -229,7 +229,7 @@ python3 ./proc_model.py
 
 ```bash
 # Clone & build
-git clone --branch git@github.com:sid-agrawal/buildroot.git
+git clone --branch cellulos git@github.com:sid-agrawal/buildroot.git
 cd buildroot
 
 # For 

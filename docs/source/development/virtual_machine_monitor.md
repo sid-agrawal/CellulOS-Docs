@@ -38,13 +38,13 @@ We have mainly changed them to add support for python, some python packages, and
 
 ### Board: Qemu ARM VIRT
 ```bash
-git clone --branch git@github.com:sid-agrawal/buildroot.git
+git clone --branch cellulos git@github.com:sid-agrawal/buildroot.git
 cd buildroot
 cp osmosis_configs/cellulos_arm_config-with-everything .config
 make # first build takes a while so bump up with -j 12 
 
 
-export OSMOSIS_DIR="~/OSmosis" # Setup as it applies to you :)
+export OSMOSIS_DIR="$HOME/OSmosis" # Setup as it applies to you :)
 cp -r $OSMOSIS_DIR/scripts/proc output/target/root/
 
 pushd
@@ -62,14 +62,20 @@ cp output/images/rootfs.cpio.gz $OSMOSIS_DIR/projects/sel4-gpi/apps/vmm/board/qe
 ```
 
 ### Board: ODROID-C4
+
+Though the libvmm instructions state using an odroidc2 config for buildroot.
+Just using the qemu buildroot image has worked fine for odroid too.
+
+`SO the instructions below are moot`
+
 ```bash
-git clone --branch git@github.com:sid-agrawal/buildroot.git
+git clone --branch cellulos git@github.com:sid-agrawal/buildroot.git
 cd buildroot
 make odroidc2_defconfig # Yes, that is c2 and that is ok.
 make # first build takes a while so bump up with -j 12 
 
 
-export OSMOSIS_DIR="~/OSmosis" # Setup as it applies to you :)
+export OSMOSIS_DIR="$HOME/OSmosis" # Setup as it applies to you :)
 cp -r $OSMOSIS_DIR/scripts/proc output/target/root/
 
 pushd
