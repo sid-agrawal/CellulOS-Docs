@@ -31,9 +31,13 @@ cd buildroot
 cp osmosis_configs/cellulos_arm_config-with-everything .config
 make # first build takes a while so bump up with -j 12 
 
+
+export OSMOSIS_DIR="~/OSmosis" # Setup as it applies to you :)
+cp -r $OSMOSIS_DIR/scripts/proc output/target/root/
+
 pushd
 cd output/build/libpfs-1.0.2
-cp lib/pypfs.cpython-310-x86_64-linux-gnu.so ../../target/root/proc/pfs/lib/cpython-310-x86_64-linux-gnu.so
+cp lib/pypfs.cpython-310-x86_64-linux-gnu.so ../../target/root/proc/pfs/lib/pyfs.cpython-310-aarch64-linux-gnu.so
 cp lib/libpfs.so ../../target/root/proc/pfs/lib/libpfs.so
 cp out/hello* ../../target/root/proc 
 popd
@@ -42,7 +46,7 @@ popd
 # Remake
 make 
 
-cp output/images/rootfs.cpio.gz projects/sel4-gpi/apps/vmm/board/qemu_arm_virt/rootfs.cpio.gz 
+cp output/images/rootfs.cpio.gz $OSMOSIS_DIR/projects/sel4-gpi/apps/vmm/board/qemu_arm_virt/rootfs.cpio.gz 
 ```
 
 

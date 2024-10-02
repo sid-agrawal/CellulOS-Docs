@@ -202,13 +202,13 @@ cp osmosis_configs/qemu_x86_config .config
 make # first build takes a while so bump up with -j 12 
 
 # Copy files
-export OSMOSIS_DIR="~/OSmosis" # Setup as it applies to you :)
+export OSMOSIS_DIR="$HOME/OSmosis" # Setup as it applies to you :)
 cp -r $OSMOSIS_DIR/scripts/proc output/target/root/
 
 pushd
 # Copy the .so files and hello* files
 cd output/build/libpfs-1.0.2/lib 
-cp lib/pypfs.cpython-310-x86_64-linux-gnu.so ../../target/root/proc/pfs/lib/cpython-310-x86_64-linux-gnu.so
+cp lib/pypfs.cpython-310-x86_64-linux-gnu.so ../../target/root/proc/pfs/lib/pypfs.cpython-310-x86_64-linux-gnu.so
 cp lib/libpfs.so ../../target/root/proc/pfs/lib/libpfs.so
 cp out/hello* ../../target/root/proc 
 
@@ -238,14 +238,14 @@ make # first build takes a while so bump up with -j 12
 
 
 # Copy files
-export OSMOSIS_DIR="~/OSmosis" # Setup as it applies to you :)
+export OSMOSIS_DIR="$HOME/OSmosis" # Setup as it applies to you :)
 cp -r $OSMOSIS_DIR/scripts/proc output/target/root/
 
 # Delete files as needed and then remake
 
 # Copy the .so files and hello* files
 cd output/build/libpfs-1.0.2/lib 
-cp lib/pypfs.cpython-310-x86_64-linux-gnu.so ../../target/root/proc/pfs/lib/cpython-310-aarch64-linux-gnu.so
+cp lib/pypfs.cpython-310-x86_64-linux-gnu.so ../../target/root/proc/pfs/lib/pypfs.cpython-310-aarch64-linux-gnu.so
 cp lib/libpfs.so ../../target/root/proc/pfs/lib/libpfs.so
 cp out/hello* ../../target/root/proc 
 make # This one should be quick.
