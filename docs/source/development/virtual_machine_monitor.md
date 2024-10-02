@@ -14,17 +14,29 @@ One implementation uses only seL4 utility libraries present in the [sel4test](ht
 ## Building the Linux image from scratch
 The instructions here are similar to the [libvmm instructions](https://github.com/au-ts/libvmm/blob/main/examples/simple/board/qemu_virt_aarch64/README.md). 
 
-1. Clone the Linux repo: `git clone --depth 1 --branch v5.18 https://github.com/torvalds/linux.git`
-2. For the regular build, copy the `linux_config` file from `board/{platform}`, where `platform` is either `qemu_arm_virt` or `odroidc4`: `cp linux_config linux/.config`
-    - For the debug build, copy the `linux_debug_config` file instead.
-3. Update the `.config` with default values for any missing options: `make ARCH=arm64  CROSS_COMPILE=aarch64-none-elf- olddefconfig`
-    - You will be prompted to manually select config values if this step is omitted
-4. Build the kernel: `make ARCH=arm64 CROSS_COMPILE=aarch64-none-elf- all -j$(nproc)`
-5. The image to give to the CellulOS VMM is at `linux/arch/arm64/boot/Image`. 
-    - If compiling the debug version, the image with symbols that can be loaded in GDB is at `linux/vmlinux`.
 
+
+```bash
+# Clone the Linux repo: 
+git clone --depth 1 --branch v5.18 https://github.com/torvalds/linux.git linux-osmosis
+# For the regular build, copy the `linux_config` file from `board/{platform}`, 
+# where `platform` is either `qemu_arm_virt` or `odroidc4`: 
+cp linux_config linux-omosis/.config
+# For the debug build, copy the `linux_debug_config` file instead.
+# Update the `.config` with default values for any missing options: 
+# You will be prompted to manually select config values if this step is omitted
+make -C linux-osmosis ARCH=arm64  CROSS_COMPILE=aarch64-none-elf- olddefconfig
+# Build the kernel: 
+make -C linux-osmosis ARCH=arm64 CROSS_COMPILE=aarch64-none-elf- all -j$(nproc)
+
+# The image to give to the CellulOS VMM is at `linux-osmosis/arch/arm64/boot/Image`. 
+# If compiling the debug version, the image with symbols that can be loaded in GDB is at `linux-osmosis/vmlinux`.
+```
 ## Building the Buildroot image from scratch
+These steps are based the [libvmm instructions](https://github.com/au-ts/libvmm/tree/main/examples/simple/board/qemu_virt_aarch64#buildroot-rootfs-image).
+We have mainly changed them to add support for python, some python packages, and pfs library.
 
+### Board: Qemu ARM VIRT
 ```bash
 git clone --branch git@github.com:sid-agrawal/buildroot.git
 cd buildroot
@@ -49,9 +61,31 @@ make
 cp output/images/rootfs.cpio.gz $OSMOSIS_DIR/projects/sel4-gpi/apps/vmm/board/qemu_arm_virt/rootfs.cpio.gz 
 ```
 
+### Board: ODROID-C4
+```bash
+git clone --branch git@github.com:sid-agrawal/buildroot.git
+cd buildroot
+make odroidc2_defconfig # Yes, that is c2 and that is ok.
+make # first build takes a while so bump up with -j 12 
 
-These steps are based the [libvmm instructions](https://github.com/au-ts/libvmm/tree/main/examples/simple/board/qemu_virt_aarch64#buildroot-rootfs-image).
-We have mainly changed them to add support for python, some python packages, and pfs library.
+
+export OSMOSIS_DIR="~/OSmosis" # Setup as it applies to you :)
+cp -r $OSMOSIS_DIR/scripts/proc output/target/root/
+
+pushd
+cd output/build/libpfs-1.0.2
+cp lib/pypfs.cpython-310-x86_64-linux-gnu.so ../../target/root/proc/pfs/lib/pyfs.cpython-310-aarch64-linux-gnu.so
+cp lib/libpfs.so ../../target/root/proc/pfs/lib/libpfs.so
+cp out/hello* ../../target/root/proc 
+popd
+
+
+# Remake
+make 
+
+cp output/images/rootfs.cpio.gz $OSMOSIS_DIR/projects/sel4-gpi/apps/vmm/board/qemu_arm_virt/rootfs.cpio.gz 
+```
+
 
 ## Source File Organization
 The source files for both implementations exist under one parent directory, [sel4-gpi/apps/vmm](https://github.com/sid-agrawal/sel4-gpi/tree/cellulos/apps/vmm) and are further divided between children `sel4test-vmm` and `osm-vmm` directories. Most source files are not implementation specific, and pass around references to a `vm_context_t` struct, which are defined by implementation specific headers. There are a few common file headers, which are under `gpivmm` directories. 
