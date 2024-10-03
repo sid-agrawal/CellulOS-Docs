@@ -205,9 +205,9 @@ make # first build takes a while so bump up with -j 12
 export OSMOSIS_DIR="$HOME/OSmosis" # Setup as it applies to you :)
 cp -r $OSMOSIS_DIR/scripts/proc output/target/root/
 
-pushd
+pushd .
 # Copy the .so files and hello* files
-cd output/build/libpfs-1.0.2/lib 
+cd output/build/libpfs-e3e998d
 cp lib/pypfs.cpython-310-x86_64-linux-gnu.so ../../target/root/proc/pfs/lib/pypfs.cpython-310-x86_64-linux-gnu.so
 cp lib/libpfs.so ../../target/root/proc/pfs/lib/libpfs.so
 cp out/hello* ../../target/root/proc 
@@ -244,10 +244,13 @@ cp -r $OSMOSIS_DIR/scripts/proc output/target/root/
 # Delete files as needed and then remake
 
 # Copy the .so files and hello* files
-cd output/build/libpfs-1.0.2/lib 
+pushd .
+cd output/build/libpfs-e3e998d
 cp lib/pypfs.cpython-310-x86_64-linux-gnu.so ../../target/root/proc/pfs/lib/pypfs.cpython-310-aarch64-linux-gnu.so
 cp lib/libpfs.so ../../target/root/proc/pfs/lib/libpfs.so
 cp out/hello* ../../target/root/proc 
+popd
+
 make # This one should be quick.
 
 # Start Qemu
