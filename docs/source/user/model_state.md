@@ -207,7 +207,7 @@ cp -r $OSMOSIS_DIR/scripts/proc output/target/root/
 
 pushd .
 # Copy the .so files and hello* files
-cd output/build/libpfs-e3e998d
+cd output/build/libpfs-699741a
 cp lib/pypfs.cpython-310-x86_64-linux-gnu.so ../../target/root/proc/pfs/lib/pypfs.cpython-310-x86_64-linux-gnu.so
 cp lib/libpfs.so ../../target/root/proc/pfs/lib/libpfs.so
 cp out/hello* ../../target/root/proc 
@@ -245,7 +245,7 @@ cp -r $OSMOSIS_DIR/scripts/proc output/target/root/
 
 # Copy the .so files and hello* files
 pushd .
-cd output/build/libpfs-e3e998d
+cd output/build/libpfs-699741a
 cp lib/pypfs.cpython-310-x86_64-linux-gnu.so ../../target/root/proc/pfs/lib/pypfs.cpython-310-aarch64-linux-gnu.so
 cp lib/libpfs.so ../../target/root/proc/pfs/lib/libpfs.so
 cp out/hello* ../../target/root/proc 
