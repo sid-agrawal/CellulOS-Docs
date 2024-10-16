@@ -191,6 +191,9 @@ To demonstrate the extraction of model state from an entirely different system, 
 ## Setup on Buildroot based Qemu VM 
 This is mainly to ensure that our `proc` based extraction has all the needed dependencies inside a buildroot based linux VM on both x86_64 and AARCH64
 
+
+
+
 ### x86_64
 ```bash
 # Clone & build
@@ -262,9 +265,14 @@ output/images/start_qemu.sh
 # Dump some example model state
 cd /root/proc
 python3 ./proc_model.py
-
-<< Unresolved how to make arm binaries compiel>>
 ```
+> A Note on the linux kernel in this buildroot.
+
+In this version, we use the Linux kernel that is supplied by buildroot.
+We have updated it to enable writes to `/dev/mem`.
+To trigger rebuild just the kernel in buildroot say after a `.config` change, 
+do `make linux-rebuilt`
+
 ## Run
 1. In `proc_model.py`, choose the configuration of programs to run.
     - You can choose an existing configuration by setting `to_run = run_configs[<idx>]` with the index of the chosen configuration.
