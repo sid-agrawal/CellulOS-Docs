@@ -270,8 +270,9 @@ python3 ./proc_model.py
 
 In this version, we use the Linux kernel that is supplied by buildroot.
 We have updated it to enable writes to `/dev/mem`.
-To trigger rebuild just the kernel in buildroot say after a `.config` change, 
-do `make linux-rebuilt`
+To trigger a rebuild of just the kernel in buildroot, 
+say after a `.config` change, 
+do `make linux-rebuild`
 
 ## Run
 1. In `proc_model.py`, choose the configuration of programs to run.
