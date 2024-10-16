@@ -47,11 +47,12 @@ make # first build takes a while so bump up with -j 12
 export OSMOSIS_DIR="$HOME/OSmosis" # Setup as it applies to you :)
 cp -r $OSMOSIS_DIR/scripts/proc output/target/root/
 
+# Replace this with overlay instructions (XXX)
 pushd .
-cd output/build/libpfs-699741a
+cd output/build/libpfs-cellulos
 cp lib/pypfs.cpython-310-x86_64-linux-gnu.so ../../target/root/proc/pfs/lib/pypfs.cpython-310-aarch64-linux-gnu.so
 cp lib/libpfs.so ../../target/root/proc/pfs/lib/libpfs.so
-cp out/hello* ../../target/root/proc 
+cp out/* ../../target/root/proc 
 popd
 
 
@@ -78,11 +79,12 @@ make # first build takes a while so bump up with -j 12
 export OSMOSIS_DIR="$HOME/OSmosis" # Setup as it applies to you :)
 cp -r $OSMOSIS_DIR/scripts/proc output/target/root/
 
+# Replace this with overlay instructions (XXX)
 pushd .
-cd output/build/libpfs-699741a
+cd output/build/libpfs-cellulos
 cp lib/pypfs.cpython-310-x86_64-linux-gnu.so ../../target/root/proc/pfs/lib/pypfs.cpython-310-aarch64-linux-gnu.so
 cp lib/libpfs.so ../../target/root/proc/pfs/lib/libpfs.so
-cp out/hello* ../../target/root/proc 
+cp out/* ../../target/root/proc 
 popd
 
 

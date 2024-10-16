@@ -186,7 +186,7 @@ To demonstrate the extraction of model state from an entirely different system, 
     - Enter the `pfs` directory: `cd pfs`.
     - Build: `cmake . & make`.
     - This should generate a python module: `/pfs/lib/pypfs.[...].so`.
-    - Copy the example files `cp pfs/out/hello* ../`
+    - Copy the example files `cp pfs/out/* ../`
 
 ## Setup on Buildroot based Qemu VM 
 This is mainly to ensure that our `proc` based extraction has all the needed dependencies inside a buildroot based linux VM on both x86_64 and AARCH64
@@ -206,11 +206,12 @@ export OSMOSIS_DIR="$HOME/OSmosis" # Setup as it applies to you :)
 cp -r $OSMOSIS_DIR/scripts/proc output/target/root/
 
 pushd .
-# Copy the .so files and hello* files
-cd output/build/libpfs-699741a
+# Copy the .so files and binary files
+# Replace this with overlay instructions (XXX)
+cd output/build/libpfs-cellulos
 cp lib/pypfs.cpython-310-x86_64-linux-gnu.so ../../target/root/proc/pfs/lib/pypfs.cpython-310-x86_64-linux-gnu.so
 cp lib/libpfs.so ../../target/root/proc/pfs/lib/libpfs.so
-cp out/hello* ../../target/root/proc 
+cp out/* ../../target/root/proc 
 
 # Delete files as needed and then remake
 popd
@@ -243,12 +244,13 @@ cp -r $OSMOSIS_DIR/scripts/proc output/target/root/
 
 # Delete files as needed and then remake
 
-# Copy the .so files and hello* files
+# Copy the .so files and binary files
+# Replace this with overlay instructions (XXX)
 pushd .
-cd output/build/libpfs-699741a
+cd output/build/libpfs-cellulos
 cp lib/pypfs.cpython-310-x86_64-linux-gnu.so ../../target/root/proc/pfs/lib/pypfs.cpython-310-aarch64-linux-gnu.so
 cp lib/libpfs.so ../../target/root/proc/pfs/lib/libpfs.so
-cp out/hello* ../../target/root/proc 
+cp out/* ../../target/root/proc 
 popd
 
 make # This one should be quick.
