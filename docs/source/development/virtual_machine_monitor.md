@@ -40,24 +40,14 @@ We have mainly changed them to add support for python, some python packages, and
 ```bash
 git clone --branch cellulos git@github.com:sid-agrawal/buildroot.git
 cd buildroot
-cp osmosis_configs/cellulos_arm_config-with-everything .config
+cp osmosis_configs/cellulos_aarch64_config-with-everything .config
 make # first build takes a while so bump up with -j 12 
 
-
+# Copy python and pfs files
 export OSMOSIS_DIR="$HOME/OSmosis" # Setup as it applies to you :)
-cp -r $OSMOSIS_DIR/scripts/proc output/target/root/
+./build-helper.sh aarch64 $OSMOSIS_DIR
 
-# Replace this with overlay instructions (XXX)
-pushd .
-cd output/build/libpfs-cellulos
-cp lib/pypfs.cpython-310-x86_64-linux-gnu.so ../../target/root/proc/pfs/lib/pypfs.cpython-310-aarch64-linux-gnu.so
-cp lib/libpfs.so ../../target/root/proc/pfs/lib/libpfs.so
-cp out/* ../../target/root/proc 
-popd
-
-
-# Remake
-make 
+make # This one should be quick.
 
 cp output/images/rootfs.cpio.gz $OSMOSIS_DIR/projects/sel4-gpi/apps/vmm/board/qemu_arm_virt/rootfs.cpio.gz 
 ```

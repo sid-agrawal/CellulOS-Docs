@@ -189,9 +189,9 @@ To demonstrate the extraction of model state from an entirely different system, 
     - Copy the example files `cp pfs/out/* ../`
 
 ## Setup on Buildroot based Qemu VM 
-This is mainly to ensure that our `proc` based extraction has all the needed dependencies inside a buildroot based linux VM on both x86_64 and AARCH64
-
-
+This is mainly to ensure that our `proc` 
+based extraction has all the needed 
+dependencies inside a `buildroot` based Linux VM on both `x86_64` and `aarch64`
 
 
 ### x86_64
@@ -201,60 +201,37 @@ git clone --branch cellulos git@github.com:sid-agrawal/buildroot.git
 cd buildroot
 
 # For 
-cp osmosis_configs/qemu_x86_config .config
+cp osmosis_configs/qemu_x86-64_config .config
 make # first build takes a while so bump up with -j 12 
 
-# Copy files
+# Copy python and pfs files
 export OSMOSIS_DIR="$HOME/OSmosis" # Setup as it applies to you :)
-cp -r $OSMOSIS_DIR/scripts/proc output/target/root/
+./build-helper.sh x86_64 $OSMOSIS_DIR
 
-pushd .
-# Copy the .so files and binary files
-# Replace this with overlay instructions (XXX)
-cd output/build/libpfs-cellulos
-cp lib/pypfs.cpython-310-x86_64-linux-gnu.so ../../target/root/proc/pfs/lib/pypfs.cpython-310-x86_64-linux-gnu.so
-cp lib/libpfs.so ../../target/root/proc/pfs/lib/libpfs.so
-cp out/* ../../target/root/proc 
-
-# Delete files as needed and then remake
-popd
 make # This one should be quick.
 
-# Start Qemu
-output/images/start_qemu.sh
+# To use qemu+KVM with Qemu's monitor enabled
+sudo ./start-qemu-kvm.sh
 
 # Once linux is booted, loging with username "root" and no password.
 # Dump some example model state
 cd /root/proc
-python3 ./proc_model.py
+python3 ./proc_model.py --csv hello.csv
 ```
 
-### AARCH64
-
+### aarch64
 ```bash
 # Clone & build
 git clone --branch cellulos git@github.com:sid-agrawal/buildroot.git
 cd buildroot
 
 # For 
-cp osmosis_configs/qemu_arm_config .config
+cp osmosis_configs/qemu_aarch64_config .config
 make # first build takes a while so bump up with -j 12 
 
-
-# Copy files
+# Copy python and pfs files
 export OSMOSIS_DIR="$HOME/OSmosis" # Setup as it applies to you :)
-cp -r $OSMOSIS_DIR/scripts/proc output/target/root/
-
-# Delete files as needed and then remake
-
-# Copy the .so files and binary files
-# Replace this with overlay instructions (XXX)
-pushd .
-cd output/build/libpfs-cellulos
-cp lib/pypfs.cpython-310-x86_64-linux-gnu.so ../../target/root/proc/pfs/lib/pypfs.cpython-310-aarch64-linux-gnu.so
-cp lib/libpfs.so ../../target/root/proc/pfs/lib/libpfs.so
-cp out/* ../../target/root/proc 
-popd
+./build-helper.sh aarch64 $OSMOSIS_DIR
 
 make # This one should be quick.
 
@@ -264,8 +241,9 @@ output/images/start_qemu.sh
 # Once linux is booted, loging with username "root" and no password.
 # Dump some example model state
 cd /root/proc
-python3 ./proc_model.py
+python3 ./proc_model.py --csv hello.csv
 ```
+
 > A Note on the linux kernel in this buildroot.
 
 In this version, we use the Linux kernel that is supplied by buildroot.
