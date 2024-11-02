@@ -34,7 +34,7 @@ pip install -r requirements.txt
     ``` 
 -->
 
-(targe_cellulos_model_state)=
+(target_cellulos_model_state)=
 # CellulOS
 In CellulOS, the tests are the only way to run scenarios.
 
@@ -68,7 +68,7 @@ ninja && ./simulate
 
 ```
 Parse the o/p and save the model state as the as `csv` file. 
-And then import it to Neo4j as explained [below]((target_visualize_model_state))
+And then import it to Neo4j as explained [below](target_visualize_model_state)
 
 ### Virtual Machine
 
@@ -157,6 +157,7 @@ This is needed as some of the same scripts are run inside the VM.
        --vmm qemu \
        --clean
  ```
+
 (target_visualize_model_state)= 
 # Visualizing Model State (Common)
 The `neo4j_docker.sh` script will spin up a docker container that runs a local Neo4j instance. 
@@ -193,21 +194,6 @@ Run `./neo4j_docker.sh clean`. This will delete the container and the Neo4j dire
 
 If you've used a custom Neo4j directory or docker container name, you must provide it as arguments: `./neo4j_docker.sh clean <neo4j_dir> <neo4j_container_name>`
 
-<!-- 
-#(target_visualize_model_state)=
-## Neo4j Aura (Cloud): Visualizing Model State
-These are instructions for uploading a model-state CSV to a Neo4j Aura (cloud) instance.
-1. Upload CSVs: Neo4j aura requires files to be hosted at a publicly-accessible url (GitHub, Google Drive, etc.)
-    - If you upload to Google Drive: You will have to upload files to a folder with link-sharing enabled, or individually enable link-sharing on each CSV. Copy the link, then modify it to a direct-download link:
-        1. The link should look like this: `https://drive.google.com/file/d/<file_id>/view?usp=drive_link`.
-        2. Replace `file/d/` with `uc?id=`.
-        3. Replace `/view?usp=drive_link` with `&export=download`.
-    - Alternatively, in Google Sheets, clicking `File > Publish to the web`, and setting the link type to `CSV` will generate URL that Neo4j can access.
-    - Note if using Google Drive: If you upload a file with the same name as a previous file and select 'Replace existing file', the download link should remain the same. Occasionally, if the file being replaced is several days old, the link will need to be updated.
-2. Paste the public links as strings into the `public_urls` array in `import_csv.py`.
-3. Import CSV to Neo4j: Run `python import_csv.py -i <idx>`, replacing `<idx>` with the index into the `public_urls` array of the CSV you want to import.
-    - Adding the flag `-c` will cause different types of resources to be different types of nodes, so the graph is colour-coded and more readable. Currently, it is not possible to calculate the metrics on a graph uploaded with `-c`.
-4. In Neo4j, open your instance, and enter queries in the Query panel to visualize the graph. -->
 
 ## Importing Data to Neo4j
 The import the CSV generates by with `CellulOS` or `/proc` use the following script.
