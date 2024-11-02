@@ -1,21 +1,27 @@
 (target_model_state)=
 # Model State
 
-This section describes how to extract, view, and use the CellulOS system's model state.
-See also the section on extracting a model state from Linux's `/proc` [below](target_proc_model_state).
+This section describes how to extract, view, and use the system's model state as generated 
+by [CellulOS](target_cellulos_model_state) 
+and [`/proc`](target_proc_model_state).
 
-## Setup
-The scripts located at `/scripts/model_state/` will process the raw CSV, upload it to Neo4j, and calculate RSI / FR metrics.
-
+# Setup the Python venv
+The scripts located at `/scripts/proc/` will process the raw CSV, upload it to Neo4j, and calculate RSI / FR metrics.
 (Assumes that `python 3.10` and `virtualenv` are already installed)
 
-### Local environment
-1. Create the virtualenv: `python -m venv venv`.
-2. Activate the virtualenv: `source ./venv/bin/activate`.
-3. Install requirements: `pip install -r requirements.txt`.
-    - Or manually install packages: `pandas==2.2.2, neo4j==5.23.0, networkx==3.3`.
+```bash
+cd scripts/proc
+# 1. Create the virtualenv (needed once)
+python -m venv venv
 
-### Using a Neo4j Aura (Cloud) Instance
+# 2. Activate the virtualenv
+source ./venv/bin/activate
+
+# Install requirements: 
+pip install -r requirements.txt
+```
+
+<!-- ### Using a Neo4j Aura (Cloud) Instance
 1. Create a free account for [neo4j Aura](https://neo4j.com/cloud/platform/aura-graph-database/).
 2. When your account is created, it should automatically create an instance. Download the connection details.
 3. Run `python neo4j_config_set.py --url <connection_url> --user <user> --password <password>` and replace the argument values with your connection details. This will create a `config.txt` file with your connection info that can be read by the `import_csv.py` script.
@@ -25,43 +31,170 @@ The scripts located at `/scripts/model_state/` will process the raw CSV, upload 
     url = <paste NEO4J_URI>
     user = <paste NEO4J_USERNAME>
     pass = <paste NEO4J_PASSWORD>
-    ```
+    ``` 
+-->
 
-(target-extracking-model-state)=
-## Extracting Model State
+(targe_cellulos_model_state)=
+# CellulOS
+In CellulOS, the tests are the only way to run scenarios.
+
+
+## Run a scenario & Extract Model State
 1. During a test, print the model state to console using the `pd_client_dump` API call.
     - When running the [system tests](target_system_tests), you can enable model state extraction with the `GPIExtractModel` [configuration option](target_configuration_options).
 2. Once the test completes, copy the printed model state to a CSV file in the same directory as the scripts.
 3. Ensure the CSV filename is prefixed with `raw_`.
 
 ## Processing Model State
-Processing elevates the model state from implementation-level to model-level. For instance, in implementation one PD may switch between two address spaces, but in the model state this should appear as two separate PDs. The processing currently splits PDs with access to more than one ADS or CPU.
+> Double check if this is still needed.
+
+Processing elevates the model state from implementation-level to model-level. 
+For instance, in implementation one PD may switch between two address spaces, but in the model state this should appear as two separate PDs. 
+The processing currently splits PDs with access to more than one ADS or CPU.
 1. Run `python csv_processing.py`. This will process all files in the current directory of the form `raw_<name>.csv` to `<name>.csv`.
 
-## Neo4j Local on Docker: Visualizing Model State
-If you don't want to use a Neo4j Aura instance, the `neo4j_docker.sh` script will spin up a docker container that runs a local Neo4j instance. **NOTE**: These instructions have only been tested on Linux.
+## Examples
 
-### Starting the container
-1. Run: `./neo4j_docker.sh start <csv_file>`, providing the CSV file you'd like to import. **NOTE**: This will replace any previouly imported CSV files in the local instance.
+### Process
 
-2. Navigate to http://localhost:7474 to access the local Neo4j console. The username and password to the console will be output when the script completes. **NOTE**: This will overwrite any existing `config.txt` files in the directory that the script is run from.
+Running the test and extracting the model state for a simple scenario.
+
+```bash
+cd BUILD_DIR
+# Configure Cmake to built test GPI* of interest 
+ccmake . 
+
+ninja && ./simulate
+
+```
+Parse the o/p and save the model state as the as `csv` file. 
+And then import it to Neo4j as explained [below]((target_visualize_model_state))
+
+### Virtual Machine
+
+Running the test and extracting the model state for a scenario with Virtual Machine.
+This requires multiple steps such are waiting the VM to boot, rung & extract the model state of the hello process
+in the guest, and then extract the model state of the root-task and the VM-PD on the host.
+Using a combination of the `pexpect` and other scripting techniques, all of this can be done with 1 script.
+
+This script assumes that
+- the OSmosis dir is `~/OSmosis`
+- the build dir is `~/OSmosis/qemu-build`
+- the buildroot image to run inside the VM is at: `~/buildroot/cellulos/qemu/buildroot-arm-cellulos-with-everything`
+
+The script does:
+- Ensures that the `*.py` scripts in the buildroot dir are same as the ones in the OSmosis repo.
+This is needed as some of the same scripts are run inside the VM.
+- Ensures the `rootfs.cpio` is the buildroot is not newer than the `rootfs.cpio` in the OSmosis repo.
+- Outputs: the following CSV files in `./outputs/{vmm}/{datetime}`
+    - `host.csv`: Model state as generated by CellulOS
+    - `guest.csv`: Model state as generated `proc_model.py` run inside the VM using `pexpect. For now it is hard coded to run the `hello` program once. 
+    - `g2h.csv`: Mappings between `guest PA --> host VA` 
+
+```bash
+ sudo -E env PATH="$HOME/.local/lib:$PATH" ./vm_model.py \ 
+       --vmm cellulos \
+       --clean
+ ```
+
+(target_proc_model_state)=
+# Proc Model State
+
+To demonstrate the extraction of model state from an entirely different system, we can build a model state from the contents of Linux's `/proc` virtual filesystem. We run some sample programs, and fetch the corresponding information from `/proc`. Currently, this extracts the following information:
+- Virtual memory regions, their permissions, and their purpose (heap, stack, file, etc.).
+- Physical memory regions and their mappings from virtual.
+- Devices which the physical memory regions originate from.
+
+## Setup on Ubuntu Host
+```bash
+cd ./scripts/proc
+
+# Activate the virtualenv: 
+source ./venv/bin/activate
+
+# Build the `pfs` module: `pfs` is a c++ library, so we use a `pybind` wrapper to generate a Python module from it.
+cd pfs
+cmake . && make 
+
+# This should generate a python module: `/pfs/lib/pypfs.[...].so`.
+#  Copy the example files `cp pfs/out/* ../`
+```
+
+## Run a scenario & Extract Model State
+In `proc_model.py`, choose the configuration of programs to run.
+You can choose an existing configuration by setting `to_run = run_configs[<idx>]` with the index of the chosen configuration.
+To add a new configuration and/or programs, ensure that the programs are built by the `pfs/osmosis_examples`, 
+and add them to the `program_names` and `run_configs` variables, and copy them to the `proc` directory.
+
+# Hello Example
+```bash
+# Activate the virtualenv: 
+source ./venv/bin/activate
+# Run: We need to include the regular `$PATH` (or `/usr/bin/`) for access to `sudo` for the namespace example.
+sudo -E env PATH="./venv/bin:$PATH" python proc_model.py
+```
+The resulting model state is saved to the `proc_model.csv` file, which can be imported into neo4j for visualization 
+following the steps [below](target_visualize_model_state).
+
+# VMM Example
+
+> This used the same script as the CellulOS VMM Example.
+
+This script assumes that
+- the buildroot image to run inside the VM is at: `~/buildroot/qemu/buildroot-x86`
+
+The script does:
+- Ensures that the `*.py` scripts in the buildroot dir are same as the ones in the OSmosis repo.
+This is needed as some of the same scripts are run inside the VM.
+- Outputs: the following CSV files in `./outputs/{vmm}/{datetime}`
+    - `host.csv`: Model state as generated by CellulOS
+    - `guest.csv`: Model state as generated `proc_model.py` run inside the VM using `pexpect. For now it is hard coded to run the `hello` program once. 
+    - `g2h.csv`: Mappings between `guest PA --> host VA` 
+
+
+```bash
+ sudo -E env PATH="$HOME/.local/lib:$PATH" ./vm_model.py \ 
+       --vmm qemu \
+       --clean
+ ```
+(target_visualize_model_state)= 
+# Visualizing Model State (Common)
+The `neo4j_docker.sh` script will spin up a docker container that runs a local Neo4j instance. 
+**NOTE**: These instructions have only been tested on Linux.
+
+## Starting the Neo4j container
+
+We are using the Neo4j enterprise container, since we want to use Bloom for visualization.
+```bash
+cd scripts/proc
+source ./bin/activate
+./neo4j_docker.sh start
+```
+
+Navigate to `http://localhost:7474` to access the local Neo4j console. 
+The username and password to the console will be output when the script completes. 
+**NOTE**: This will overwrite any existing `config.txt` files in the directory that the script is run from.
+
+## To connect to Bloom
+To use Bloom it is better to install the Neo4j Desktop app from (https://neo4j.com/download/)
  
-### Additional options
-#### Neo4j data directory
-The script will, by default, create a `neo4j` directory in your home directory, to store the local instance's data. You can change where this should be created by supplying the path as the third argument to the script: `./neo4j_docker.sh start <csv_file> <neo4j_dir>`
+## Additional options
+### Neo4j data directory
+The script will, by default, create a `neo4j` directory in your home directory, to store the local instance's data. You can change where this should be created by supplying the path as the third argument to the script: `./neo4j_docker.sh start <neo4j_dir>`
 
-#### Neo4j docker container name
+### Neo4j docker container name
 The script re-uses the same docker container across invocations. The default name for this container is `neo4j-osm`. You can change its name by providing a fourth argument to the script: `./neo4j_docker.sh start <csv_file> <neo4j_dir> <neo4j_container_name>`
 
-### Stopping the Container
+## Stopping the Container
 Run `./neo4j_docker.sh stop`. If you've used a custom Neo4j directory or docker container name, you must provide it as arguments: `./neo4j_docker.sh stop <neo4j_dir> <neo4j_container_name>`
 
-### Cleaning Up the Container and All Local Data
+## Cleaning Up the Container and All Local Data
 Run `./neo4j_docker.sh clean`. This will delete the container and the Neo4j directory associated with it, you may be prompted for `sudo` permissions.
 
 If you've used a custom Neo4j directory or docker container name, you must provide it as arguments: `./neo4j_docker.sh clean <neo4j_dir> <neo4j_container_name>`
 
-(target_visualize_model_state)=
+<!-- 
+#(target_visualize_model_state)=
 ## Neo4j Aura (Cloud): Visualizing Model State
 These are instructions for uploading a model-state CSV to a Neo4j Aura (cloud) instance.
 1. Upload CSVs: Neo4j aura requires files to be hosted at a publicly-accessible url (GitHub, Google Drive, etc.)
@@ -74,9 +207,29 @@ These are instructions for uploading a model-state CSV to a Neo4j Aura (cloud) i
 2. Paste the public links as strings into the `public_urls` array in `import_csv.py`.
 3. Import CSV to Neo4j: Run `python import_csv.py -i <idx>`, replacing `<idx>` with the index into the `public_urls` array of the CSV you want to import.
     - Adding the flag `-c` will cause different types of resources to be different types of nodes, so the graph is colour-coded and more readable. Currently, it is not possible to calculate the metrics on a graph uploaded with `-c`.
-4. In Neo4j, open your instance, and enter queries in the Query panel to visualize the graph.
+4. In Neo4j, open your instance, and enter queries in the Query panel to visualize the graph. -->
 
-### Sample Queries
+## Importing Data to Neo4j
+The import the CSV generates by with `CellulOS` or `/proc` use the following script.
+This script assumes that the neo4j docker instance with the name `neo4j-osm` is running on the same machine.
+
+The script first converts the model state CSV to a form of CSV that the `neo4j-admin` tool expects.
+We use `neo4j-admin` tool as that is faster than using `LOAD CSV` with a schema directly.
+The script interacts with the docker instance using `docker exec` and `subprocess.run`.
+It copies the new CSV file in the `~/neo4j/import` folder which is mounted inside the docker container.
+
+The data is imported to a new DB `test1` and the old DBs are deleted.
+
+```bash
+cd scripts/proc
+source bin/activate 
+sudo -E env PATH="$HOME/.local/lib:$PATH" \
+    python ./import_csv.py \
+             --db test1    \
+             --files ./file1.csv  ./file2.csv 
+```
+
+## Sample Queries
 - Everything: Not recommended when the graph is large.
 
 ```CYPHER
@@ -169,24 +322,6 @@ RSI BLOCK: 1.0
 FR: 1
 ```
 
-(target_proc_model_state)=
-# Proc Model State
-
-To demonstrate the extraction of model state from an entirely different system, we can build a model state from the contents of Linux's `/proc` virtual filesystem. We run some sample programs, and fetch the corresponding information from `/proc`. Currently, this extracts the following information:
-- Virtual memory regions, their permissions, and their purpose (heap, stack, file, etc.).
-- Physical memory regions and their mappings from virtual.
-- Devices which the physical memory regions originate from.
-
-## Setup on Ubuntu Host
-1. Create the virtualenv: `python -m venv venv`.
-2. Activate the virtualenv: `source ./venv/bin/activate`.
-3. Install requirements: `pip install -r requirements.txt`.
-    - Or manually install packages: `pybind11`, `networkx`.
-4. Build the `pfs` module: `pfs` is a c++ library, so we use a `pybind` wrapper to generate a Python module from it.
-    - Enter the `pfs` directory: `cd pfs`.
-    - Build: `cmake . & make`.
-    - This should generate a python module: `/pfs/lib/pypfs.[...].so`.
-    - Copy the example files `cp pfs/out/* ../`
 
 ## Setup on Buildroot based Qemu VM 
 This is mainly to ensure that our `proc` 
@@ -251,13 +386,3 @@ We have updated it to enable writes to `/dev/mem`.
 To trigger a rebuild of just the kernel in buildroot, 
 say after a `.config` change, 
 do `make linux-rebuild`
-
-## Run
-1. In `proc_model.py`, choose the configuration of programs to run.
-    - You can choose an existing configuration by setting `to_run = run_configs[<idx>]` with the index of the chosen configuration.
-    - To add a new configuration and/or programs, ensure that the programs are built by the `pfs/osmosis_examples`, 
-      and add them to the `program_names` and `run_configs` variables, and copy them to the `proc` directory.
-2. Activate the virtualenv: `source ./venv/bin/activate`.
-3. Run `sudo -E env PATH="./venv/bin:$PATH" python proc_model.py`.
-    - We need to include the regular `$PATH` (or `/usr/bin/`) for access to `sudo` for the namespace example.
-4. The resulting model state is saved to the `proc_model.csv` file, which can be imported into neo4j for visualization following the steps [above](target_visualize_model_state).
