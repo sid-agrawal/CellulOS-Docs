@@ -354,7 +354,7 @@ sudo ./start-qemu-kvm.sh
 # Once linux is booted, loging with username "root" and no password.
 # Dump some example model state
 cd /root/proc
-python3 ./proc_model.py --csv hello.csv
+python3 ./proc_model.py --csv hello.csv --os linux
 ```
 
 ### aarch64
@@ -379,7 +379,7 @@ output/images/start_qemu.sh
 # Once linux is booted, loging with username "root" and no password.
 # Dump some example model state
 cd /root/proc
-python3 ./proc_model.py --csv hello.csv
+python3 ./proc_model.py --csv hello.csv --os linux
 ```
 
 > A Note on the linux kernel in this buildroot.
