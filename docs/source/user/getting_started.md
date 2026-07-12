@@ -1,6 +1,7 @@
 # Getting Started
 
 ```{toctree}
+odroid_hardware
 booting
 ```
 

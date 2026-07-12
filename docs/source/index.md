@@ -90,6 +90,8 @@ user/user_configuration_options
 user/cellulos_tests
 user/model_state
 user/running_benchmarks
+user/benchmarking_on_hardware
+user/odroid_linux_kvm
 ```
 
 ```{toctree}

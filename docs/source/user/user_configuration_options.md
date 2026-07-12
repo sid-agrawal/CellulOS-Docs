@@ -9,8 +9,15 @@ This section describes the CellulOS configuration options that can be specified 
 - `GPIServerEnabled`: A boolean option controlling whether or not to run the [GPI server](target_glossary_gpi_server), see also [test types](target_system_test_types).
 - `GPIBenchmarkIterBits`: An option controlling how many times to rerun the same benchmark test in a single boot. The number of iterations will be `2^GPIBenchmarkIterBits`. This option will be handled by the [benchmarking script](target_benchmarking).
 - `GPINanobenchEnabled`: An boolean option to enable or disable nanobenchmark outputs in the GPI server. See [benchmarking](target_benchmarking) for more details.
-- `GPIExtractModel`: A boolean option controlling whether or not to extract the model state during tests. To use this option, tests should call `extract_model` from `test_shared.h`. All [system tests](target_system_tests), except for the benchmarks, will print a model state if this is enabled.
-- `GPIVmmImplementation`: String defining which VMM implementation to compile, only one of `sel4test-vmm` and `osm-vmm` may be compiled at a time.
+- `GPIExtractModel`: A boolean option controlling whether or not to extract the model state during tests. To use this option, tests should call `extract_model` from `test_shared.h`. All [system tests](target_system_tests), except for the benchmarks, will print a model state if this is enabled. It also gates the model dump that the OSmosis VMM performs while creating a guest. **Set this to `OFF` when benchmarking on real hardware**: extracting the model prints a CSV row per node and edge, and on the board every line blocks on the UART for milliseconds. See [benchmarking on hardware](target_hw_benchmarking).
+- `GPIVMMImplementation`: String defining which VMM implementation to compile: either `sel4test-vmm` (untracked, exercised by `GPIVM002`) or `osm-vmm` (CellulOS-tracked, exercised by `GPIVM004`). Only one may be compiled at a time. **This is the switch that selects tracked vs untracked VM measurements.**
+
+```{attention}
+`GPIVMMImplementation` is spelled with a capitalised `VMM`, and CMake variable names are
+**case-sensitive**. Passing `-DGPIVmmImplementation=osm-vmm` (the spelling this page used to carry) does
+nothing at all: the build silently falls back to the default `sel4test-vmm`, and you measure the
+*untracked* VMM while believing you built the tracked one.
+```
 
 (target_configuration_cleanup_policy)=
 ## Resource Space Cleanup Policy Depth

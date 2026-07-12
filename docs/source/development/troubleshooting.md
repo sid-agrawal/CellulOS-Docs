@@ -13,7 +13,7 @@ cd qemu-build
 ../init-build.sh -DAARCH64=TRUE -DPLATFORM=qemu-arm-virt -DSIMULATION=TRUE
 ```
 
-For Odroid-D4:
+For Odroid-C4:
 ```
 rm -r -f odroid-build
 ccache -C
@@ -21,6 +21,10 @@ mkdir odroid-build
 cd odroid-build
 ../init-build.sh -DPLATFORM=odroidc4
 ```
+
+For a benchmark or VMM image you will want more flags than that — `-DLibSel4TestPrinterRegex`,
+`-DGPIServerEnabled`, `-DGPIExtractModel` and `-DGPIVMMImplementation`. See the
+[Odroid-C4 build recipe](target_odroid_build) for the full set and the four measurement configurations.
 
 ## Debug Prints
 The debug options for the GPI server are located in `projects/sel4-gpi/libsel4gpi/include/sel4gpi/debug.h`:

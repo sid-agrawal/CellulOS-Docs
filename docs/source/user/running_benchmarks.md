@@ -3,6 +3,20 @@
 
 The benchmarking script located at `/scripts/bench` builds and runs a series of images for benchmarking various CellulOS operations on the Odroid-C4 board.
 
+```{note}
+**There are two harnesses; make sure you want this one.**
+
+- **This page** documents `scripts/bench/run_benchmarks.py`, the `sel4bench`/nanobench harness. Use it
+  when you want to instrument *operations inside the system* with `BENCH_UTILS_*` macros and collect the
+  results in `benchmarks.csv`.
+- For the **startup campaign** (process spawn and Linux-guest boot, tracked vs untracked, with
+  **host-side timestamps** on the serial console), use `scripts/odroid-c4-bench/campaign.py` and read
+  [Benchmarking on Real Hardware](target_hw_benchmarking) first. In-guest and in-system clocks cannot see
+  host-side stalls, so that campaign deliberately times things from the host.
+
+Either way, the [serial I/O in timed regions](target_hw_benchmarking) warning applies.
+```
+
 ## Setup 
 (Assumes that `python 3.10` and `virtualenv` are already installed)
 
@@ -158,7 +172,8 @@ This makes the assumption that your environment is set up as described in [booti
     - Choose print verbosity with the `print_uboot` / `print_sel4test` / `print_logs` options.
     - If you are rerunning benchmarks and the images to test are already built, you can set `rebuild = False` to save time.
 3. From within the virtualenv: `sudo -E env PATH=$PATH python run_benchmarks.py`.
-    - `sudo` is needed for the script to access `/dev/ttyUSB0` & `/dev/ttyUSB0`, and copy build images to `/srv/tftp`.
+    - `sudo` is needed for the script to access **both** serial devices — the console *and* the power relay — and to copy build images to `/srv/tftp`.
+    - You can drop the `sudo` requirement for the serial devices by adding yourself to the `dialout` group and installing the udev rule from [Identify the USB devices by chip](target_odroid_identify_devices), which also gives them stable `/dev/odroid-console` and `/dev/odroid-relay` names. Do not assume the console is `ttyUSB0` — the numbering changes across replug.
     - Alternatively, to run a process in the background that will not be killed when the ssh session closes: `bash ./run` (you may need to run a `sudo` command from this terminal session first). You can check on its progress using `cat nohup.out`.
     - To find your benchmark processes running in the background: `ps -ef | grep run_benchmarks.py`.
 4. Results are saved to `benchmarks.csv`. 

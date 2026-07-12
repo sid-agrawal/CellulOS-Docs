@@ -42,6 +42,35 @@ High
 ### Tested System Components
 Although most benchmarks are quite basic, they run the most important functionalities for the system to operate properly, and so they do end up covering a large portion of the system.
 
+### Startup benchmarks
+
+Two of these benchmarks form a tracked/untracked pair for **process spawn**, and are the process half of
+the startup measurements:
+
+#### GPIBM003
+`sel4utils bench process spawn / send cap` — spawns a process using plain sel4utils, i.e. **untracked**.
+Defined as a `BASIC` test, so it runs with `GPIServerEnabled=OFF`.
+
+#### GPIBM004
+`osm bench process spawn / send cap` — spawns the same process as a CellulOS PD, i.e. **tracked**.
+Defined as an `OSM` test, so it requires `GPIServerEnabled=ON`.
+
+The VM half of the pair is [GPIVM002 / GPIVM004](target_vmm_tests). Together, the four configurations
+are:
+
+| Test | What it measures | `GPIServerEnabled` | `GPIVMMImplementation` |
+|---|---|---|---|
+| `GPIBM003` | process spawn, **untracked** (sel4utils) | `OFF` | n/a |
+| `GPIBM004` | process spawn, **tracked** (osm) | `ON` | n/a |
+| `GPIVM002` | Linux guest boot, **untracked** | `OFF` | `sel4test-vmm` |
+| `GPIVM004` | Linux guest boot, **tracked** | `ON` | `osm-vmm` |
+
+```{attention}
+Before running any of these on the board, read [benchmarking on real hardware](target_hw_benchmarking).
+Debug prints inside a timed region are free under Qemu and cost ~6–8 ms per line on the Odroid's UART —
+this has already produced badly wrong numbers once.
+```
+
 ## GPIPD00X - Simple process-PDs
 ### Coverage Level
 Low

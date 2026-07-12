@@ -8,8 +8,11 @@ One implementation uses only seL4 utility libraries present in the [sel4test](ht
 
 |  guestOS  |  microkit  | non-OSM (sel4utils)  |     OSM     |     QEMU     |
 | --------- | ---------- | -------------------- | ----------  | -----------  | 
-|   Linux   |    Yes (Odroid and Qemu)     |        Yes (Odroid and Qemu)           |     Yes (Odroid and Qemu)     |  Assumed Yes |
+|   Linux   |    Yes (Odroid and Qemu)     |        Yes — **confirmed booting on real Odroid-C4 hardware** (`GPIVM002`), and on Qemu           |     Yes — **confirmed booting on real Odroid-C4 hardware** (`GPIVM004`), and on Qemu     |  Assumed Yes |
 |  baby-VM  |     NA     |        Yes - Qemu, Not fully working on Odroid          |     Yes - Qemu, Not fully working on Odroid      |     Yes      |
+
+Both Linux configurations have been booted and timed on a physical Odroid-C4 as part of the startup
+measurements; see [benchmarking on hardware](target_hw_benchmarking).
 
 ## Building the Linux image from scratch
 The instructions here are similar to the [libvmm instructions](https://github.com/au-ts/libvmm/blob/main/examples/simple/board/qemu_virt_aarch64/README.md). 
@@ -52,12 +55,43 @@ make # This one should be quick.
 cp output/images/rootfs.cpio.gz $OSMOSIS_DIR/projects/sel4-gpi/apps/vmm/board/qemu_arm_virt/rootfs.cpio.gz 
 ```
 
+(target_odroid_rootfs)=
 ### Board: ODROID-C4
 
-Though the libvmm instructions state using an odroidc2 config for buildroot.
-Just using the qemu buildroot image has worked fine for odroid too.
+```{attention}
+**The odroidc4 VMM build fails out of the box.** `apps/vmm/board/odroidc4/rootfs.cpio.gz` is listed in
+that directory's `.gitignore`, so it is **absent from a fresh clone**, and nothing in the build generates
+it. You must put a rootfs there yourself before building the VMM for `odroidc4`.
+```
 
-`SO the instructions below are moot`
+You do **not** need a separate buildroot run for the Odroid. The `qemu_arm_virt` buildroot image works
+unmodified on the Odroid-C4 — just copy it across:
+
+```bash
+export OSMOSIS_DIR="$HOME/OSmosis" # Setup as it applies to you :)
+
+cp $OSMOSIS_DIR/projects/sel4-gpi/apps/vmm/board/qemu_arm_virt/rootfs.cpio.gz \
+   $OSMOSIS_DIR/projects/sel4-gpi/apps/vmm/board/odroidc4/rootfs.cpio.gz
+```
+
+(Build the `qemu_arm_virt` rootfs first, as described in the section above, if you do not already have
+one.)
+
+```{note}
+This is a stop-gap, not a design. The proper fixes are to ship `rootfs.cpio.gz` (un-gitignore it, or put
+it in LFS) or to add a CMake step that populates the odroidc4 board directory from the qemu one when it
+is missing. Until then, the copy above is a required manual step.
+```
+
+#### Historical: the odroidc2 buildroot config
+
+The libvmm instructions suggest building buildroot with an odroidc2 config for this board. **These
+instructions are moot** — we have never needed them, since the qemu image works — but they are preserved
+here in case the qemu rootfs ever stops being adequate.
+
+Note that even this recipe ends by copying into the **`qemu_arm_virt`** board directory, not the
+`odroidc4` one; that is not a typo in the original, it is simply why the odroidc4 path was never
+populated by any documented step.
 
 ```bash
 git clone --branch cellulos git@github.com:sid-agrawal/buildroot.git
