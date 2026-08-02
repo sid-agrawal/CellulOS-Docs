@@ -130,6 +130,12 @@ The development of the OSmosis model is mainly driven by Sid Agrawal with inputs
 * Students: Arya Stevinson | Linh Pham | [Shaurya Patel](https://shauryapatel1995.github.io/)
 * Faculty: [Prof. Margo Seltzer](https://www.seltzer.com/margo) | [Prof. Reto Achermann](https://retoachermann.ch/) | [Prof. Aastha Mehta](https://aasthakm.github.io/)
 
+# Related Publications
+* [Exploring the Design Space of Isolation Mechanisms using OSmosis](https://sid-agrawal.ca/agrawalOSmosisExplorePLOS2026.pdf) — PLOS 2026.
+* [Comparing Isolation Mechanisms with OSmosis](https://dl.acm.org/doi/10.1145/3764860.3768325) — PLOS 2025.
+* [CellulOS: An OS for Comparing Isolation Mechanisms](https://sel4summit2025.sched.com/event/26GFQ?iframe=no) — talk at the seL4 Summit 2025.
+* [OSmosis: No more Déjà vu in OS isolation](https://arxiv.org/abs/2309.09291) — original OSmosis model (arXiv, **deprecated**).
+
 # How to Cite
 If you use the CellulOS prototype in your research, please cite it as software:
 
