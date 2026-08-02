@@ -129,3 +129,18 @@ The development of the CellulOS prototype is mainly done by:
 The development of the OSmosis model is mainly driven by Sid Agrawal with inputs from:
 * Students: Arya Stevinson | Linh Pham | [Shaurya Patel](https://shauryapatel1995.github.io/)
 * Faculty: [Prof. Margo Seltzer](https://www.seltzer.com/margo) | [Prof. Reto Achermann](https://retoachermann.ch/) | [Prof. Aastha Mehta](https://aasthakm.github.io/)
+
+# How to Cite
+If you use the CellulOS prototype in your research, please cite it as software:
+
+```bibtex
+@software{cellulos,
+  title  = {{CellulOS}: An {OSmosis}-based {OS} personality on {seL4}},
+  author = {Agrawal, Sidhartha and Stevinson, Arya and Pham, Linh},
+  year   = {2024},
+  url    = {https://cellulosdocs.readthedocs.io/},
+  note   = {University of British Columbia, Systopia Lab}
+}
+```
+
+To cite the underlying OSmosis model, cite the PLOS 2025 paper [Comparing Isolation Mechanisms with OSmosis](https://dl.acm.org/doi/10.1145/3764860.3768325).
